@@ -1,0 +1,58 @@
+name: Deploy apps to GitHub Pages
+
+# Zero-key hosting: enable once in repo Settings -> Pages -> Source: "GitHub Actions".
+# Every merge to main then publishes all apps at:
+#   https://<owner>.github.io/consumer/<slug>/
+# (Custom domain later: Settings -> Pages -> Custom domain, see docs/NEEDS-FROM-HUMAN.md)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble site from apps/
+        run: |
+          mkdir -p _site
+          for d in apps/*/; do
+            slug=$(basename "$d")
+            mkdir -p "_site/$slug"
+            cp -r "$d"/* "_site/$slug/"
+            rm -rf "_site/$slug/screenshots" "_site/$slug/marketing" \
+                   "_site/$slug/SPEC.md" "_site/$slug/AUDIT.md" "_site/$slug/README.md" || true
+          done
+          # Studio index: plain list of live apps
+          {
+            echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+            echo '<title>apps</title><style>body{font:16px/1.6 system-ui;max-width:32rem;margin:4rem auto;padding:0 1rem}a{display:block;padding:.75rem 0;font-size:1.25rem}</style>'
+            echo '<h1>Apps</h1>'
+            for d in apps/*/; do
+              slug=$(basename "$d")
+              name=$(grep -oPm1 '(?<=<title>)[^<]+' "$d/index.html" 2>/dev/null || echo "$slug")
+              echo "<a href=\"./$slug/\">$name</a>"
+            done
+          } > _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
