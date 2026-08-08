@@ -12,7 +12,7 @@ history.
 | Phase | build — first app in flight |
 | Current app | **Last Visits** (`apps/last-visits/`) — picked from 15 ideas, judge score 7.67/10 |
 | Open PR | [#1](https://github.com/vinilpolepalli/consumer/pull/1) (draft) |
-| Loop | Routine pending setup |
+| Loop | **Live** — Routine `trig_01PTBwaYNDWDAA7WerV2Jm8n`, every 8h (pause via claude.ai/code → Routines) |
 
 ## Shipped apps
 
