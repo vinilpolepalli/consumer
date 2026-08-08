@@ -1284,6 +1284,13 @@ async function doShare(saveOnly) {
     done(); maybeInstallBanner('share');
     return;
   }
+  // anchor-blob downloads silently no-op in iOS standalone / WKWebView — share the file instead
+  const file = new File([blob], 'last-visits.png', { type: 'image/png' });
+  if (STANDALONE && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); toast('Saved. Maybe call ' + name + ' too.'); } catch (e) { /* canceled — fine */ }
+    done(); maybeInstallBanner('share');
+    return;
+  }
   const a = $('dl');
   a.href = URL.createObjectURL(blob); a.download = 'last-visits.png'; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
