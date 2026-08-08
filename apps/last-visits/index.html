@@ -1,0 +1,1818 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0F0E0C">
+<meta name="description" content="Count the visits you have left with the people you love. Then raise the number.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Last Visits">
+<title>Last Visits</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --paper:#0F0E0C; --surface:#1A1815; --surface2:#211E1A; --line:#2A2723;
+  --ink:#F4EFE6; --ink-2:#A69E90; --ink-3:#6E675C;
+  --amber:#E8A33D; --amber-deep:#C97F1D; --on-amber:#201503;
+  --dot-left:#FFF8EC; --dot-rest:#2E2B26; --rose:#D98B7E;
+  /* Liquid Glass materials */
+  --glass:rgba(255,248,236,0.055); --glass2:rgba(255,248,236,0.09);
+  --glass-edge:rgba(255,248,236,0.14); --glass-hi:rgba(255,248,236,0.22);
+  --glass-sheet:rgba(24,22,19,0.66);
+  --glass-amber:rgba(232,163,61,0.82); --glass-amber-soft:rgba(232,163,61,0.16);
+  --blur:blur(22px) saturate(170%); --blur-lite:blur(14px) saturate(160%);
+  --font-d:"New York", ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --font-t:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-t);font-size:17px;line-height:1.47;
+  overscroll-behavior-y:none;overflow-x:hidden}
+/* ambient field the glass refracts — fixed, behind every view */
+body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(42% 30% at 18% 8%, rgba(232,163,61,.13), transparent 70%),
+    radial-gradient(50% 36% at 88% 30%, rgba(217,139,126,.07), transparent 72%),
+    radial-gradient(60% 44% at 50% 108%, rgba(201,127,29,.10), transparent 75%),
+    var(--paper)}
+/* glass material primitives */
+.glass, .chip, .stepbtn, .btn-ghost, .seg, .deltachip, .streak, .pcard, .addcard,
+.plan, .payfeat .ic, #toast, #installBanner, .mono, input{
+  -webkit-backdrop-filter:var(--blur-lite); backdrop-filter:var(--blur-lite)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .sheet{background:var(--surface)}
+  .chip,.stepbtn,.btn-ghost,.seg,.deltachip,.streak,.pcard,.addcard,.plan,#toast,#installBanner,.mono,input{background:var(--surface)}
+}
+button{font-family:var(--font-t);color:inherit;background:none;border:0;cursor:pointer}
+input{font-family:var(--font-t);color:var(--ink);background:var(--glass);border:1px solid var(--glass-edge);
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.07);border-radius:14px;font-size:17px;outline:none;width:100%}
+input:focus{border-color:var(--glass-hi)}
+input::placeholder{color:var(--ink-3)}
+h1{font-family:var(--font-d);font-size:26px;line-height:32px;font-weight:600;letter-spacing:-.01em}
+h2{font-family:var(--font-d);font-size:22px;line-height:28px;font-weight:600}
+.caption{font-size:13px;line-height:18px;color:var(--ink-3)}
+.sub{font-size:15px;color:var(--ink-2)}
+.microlabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- views ---------- */
+.view{position:fixed;inset:0;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  padding:calc(var(--sat) + 18px) 24px calc(var(--sab) + 24px);background:transparent}
+.view.active{display:flex}
+.ctabar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:14px 24px calc(var(--sab) + 14px);
+  background:linear-gradient(to top, var(--paper) 68%, rgba(15,14,12,0));pointer-events:none;display:none}
+.ctabar.on{display:block}
+.ctabar>*{pointer-events:auto}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;border-radius:18px;
+  background:var(--glass-amber);color:var(--on-amber);font-size:17px;font-weight:600;
+  -webkit-backdrop-filter:var(--blur-lite);backdrop-filter:var(--blur-lite);
+  border:1px solid rgba(255,220,160,.35);
+  box-shadow:inset 0 1px 0 rgba(255,235,200,.45), inset 0 -1px 0 rgba(120,70,0,.25), 0 8px 26px rgba(232,163,61,.16);
+  transition:transform .12s,opacity .2s}
+.btn:active{transform:scale(.985);background:var(--amber-deep)}
+.btn:disabled{opacity:.3;pointer-events:none}
+.btn-ghost{background:var(--glass);color:var(--ink);border:1px solid var(--glass-edge);
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.09)}
+.btn-ghost:active{background:var(--glass2)}
+.quiet{color:var(--ink-2);font-size:15px;min-height:44px;display:inline-flex;align-items:center;gap:6px}
+.quiet:active{color:var(--ink)}
+.iconbtn{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);font-size:22px;border-radius:12px}
+.iconbtn:active{background:var(--surface)}
+
+/* ---------- input screen ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:9px 15px;border-radius:999px;border:1px solid var(--glass-edge);background:var(--glass);
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.08);
+  color:var(--ink);font-size:15px;font-weight:500;transition:background .15s,color .15s,border-color .15s}
+.chip.sel{background:var(--glass-amber);border-color:rgba(255,220,160,.4);color:var(--on-amber);font-weight:600;
+  box-shadow:inset 0 1px 0 rgba(255,235,200,.45), 0 4px 16px rgba(232,163,61,.18)}
+.chips.freq{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chips.freq .chip{border-radius:14px;text-align:center;justify-self:stretch}
+.field{margin-top:15px}
+.field .lab{display:block;font-size:15px;font-weight:600;margin-bottom:8px}
+.helper{font-size:13px;color:var(--ink-3);margin-top:6px}
+.err{font-size:14px;color:var(--rose);margin-top:10px;display:none}
+.err.on{display:block}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepbtn{width:48px;height:48px;flex:0 0 48px;border-radius:50%;border:1px solid var(--glass-edge);background:var(--glass);
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.1);
+  color:var(--ink);font-size:24px;display:flex;align-items:center;justify-content:center}
+.stepbtn:active{background:var(--glass2)}
+#parentAge{font-family:var(--font-d);font-size:44px;font-weight:600;color:var(--amber);text-align:center;
+  background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:2px 0;font-variant-numeric:tabular-nums}
+#parentAge::placeholder{color:#4A4232}
+.agerow{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+#userAge{padding:12px 14px;font-variant-numeric:tabular-nums}
+#customName{padding:12px 14px}
+
+/* ---------- reveal ---------- */
+#view-reveal{padding-left:0;padding-right:0;align-items:center;justify-content:flex-start}
+#revealTopbar{width:100%;display:flex;justify-content:space-between;align-items:center;padding:0 16px;min-height:44px}
+#revealCounterTop{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums;padding-right:8px}
+#revealCanvasWrap{width:100%;padding:8px 24px 0;display:flex;justify-content:center}
+#revealCanvas{display:block}
+.chrome{opacity:0;pointer-events:none;transition:opacity .5s}
+.chrome.show{opacity:1;pointer-events:auto}
+#revealCenter{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;margin-top:14px;padding:0 24px}
+#whyLink{margin-bottom:4px}
+.bignum{font-family:var(--font-d);font-size:clamp(72px,13vh,112px);line-height:1;font-weight:600;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+#revealLabel{font-size:20px;color:var(--ink-2);margin-top:6px}
+#revealSub{max-width:320px;margin-top:10px}
+#revealSmall{max-width:320px;margin-top:8px;color:var(--amber);font-size:14px;display:none}
+#revealActions{display:flex;flex-direction:column;gap:10px;width:100%}
+#revealSkip{position:fixed;right:16px;bottom:calc(var(--sab) + 16px);color:var(--ink-3);font-size:15px;padding:10px 14px;min-height:44px;z-index:5}
+#guessNote{margin-top:8px;display:none}
+
+/* ---------- outrun (100+) ---------- */
+#view-outrun{justify-content:center;text-align:center;gap:16px;align-items:center}
+#view-outrun h1{font-size:32px;line-height:38px;max-width:320px}
+#view-outrun p{color:var(--ink-2);max-width:320px}
+
+/* ---------- home ---------- */
+.homehead{display:flex;justify-content:space-between;align-items:center;min-height:44px;margin-bottom:6px}
+.pcard{background:var(--glass);border:1px solid var(--glass-edge);border-radius:22px;padding:18px;margin-top:14px;
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.09), 0 10px 34px rgba(0,0,0,.28)}
+.pcard .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.pcard .pname{font-family:var(--font-d);font-size:22px;font-weight:600}
+.pcard .thumbwrap{margin-top:12px;border-radius:12px;overflow:hidden}
+.pcard canvas{display:block;width:100%}
+.pcard .numline{margin-top:14px;display:flex;align-items:baseline;gap:10px}
+.pcard .pnum{font-family:var(--font-d);font-size:52px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums}
+.pcard .about{font-size:13px;color:var(--ink-3)}
+.pcard .paceline{font-size:14px;color:var(--ink-2);margin-top:6px}
+.planline{font-size:13px;color:var(--ink-3);margin-top:4px}
+.streak{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--ink-2);
+  background:var(--glass);border:1px solid var(--glass-edge);border-radius:999px;padding:7px 12px;
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.07)}
+.streak .dot{width:8px;height:8px;border-radius:50%;background:var(--amber)}
+.logrow{display:flex;gap:10px;margin-top:14px}
+.logrow .btn{min-height:48px;font-size:15px;border-radius:14px}
+.raiserow{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;margin-top:12px;
+  padding:0 4px;color:var(--amber);font-size:15px;font-weight:600}
+.lock{opacity:.75;font-weight:400;font-size:12px;color:var(--ink-3);margin-left:6px}
+.addcard{border:1px dashed var(--glass-edge);background:var(--glass);border-radius:22px;padding:18px;margin-top:14px;width:100%;text-align:left}
+.addcard .t{font-size:16px;font-weight:600}
+.addcard .s{font-size:13px;color:var(--ink-3);margin-top:4px}
+.histwrap{margin-top:12px;border-top:1px solid var(--line);padding-top:6px}
+.histrow{display:flex;align-items:center;justify-content:space-between;min-height:44px;font-size:14px;color:var(--ink-2)}
+.histrow .del{min-width:44px;min-height:44px;color:var(--ink-3);font-size:18px}
+.glow{animation:bloom 1s ease-out 1}
+@keyframes bloom{0%{box-shadow:0 0 0 rgba(232,163,61,0)}30%{box-shadow:0 0 34px rgba(232,163,61,.45)}100%{box-shadow:0 0 0 rgba(232,163,61,0)}}
+
+/* ---------- planner ---------- */
+#view-planner{padding-left:0;padding-right:0}
+.pushhead{display:flex;align-items:center;gap:4px;padding:0 12px;min-height:48px}
+.pushhead h2{flex:1;text-align:center;padding-right:44px}
+#plannerCanvasWrap{padding:6px 24px;display:flex;justify-content:center;align-items:center;height:calc(34vh + 12px);flex:0 0 auto}
+#plannerDelta{position:relative;height:40px;display:flex;justify-content:center;align-items:center}
+.deltachip{display:none;background:var(--glass2);border:1px solid var(--glass-edge);border-radius:999px;
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.1);
+  padding:8px 16px;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.deltachip.up{display:inline-flex;color:var(--amber);border-color:rgba(232,163,61,.4);background:var(--glass-amber-soft)}
+.deltachip.down{display:inline-flex;color:var(--ink-2)}
+#plannerSentence{padding:8px 32px 4px;text-align:center;font-family:var(--font-d);font-size:22px;line-height:30px}
+#plannerSentence b{color:var(--amber);font-weight:600}
+#plannerNote{text-align:center;padding:0 32px;margin-top:6px}
+.sliderzone{padding:22px 32px 8px;position:relative}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:48px;background:transparent;border:0;padding:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;
+  background:var(--amber);margin-top:-11px;box-shadow:0 2px 10px rgba(0,0,0,.5)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radius:50%;background:var(--amber)}
+.nowtick{position:absolute;top:8px;transform:translateX(-50%);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.nowtick::after{content:"";display:block;width:2px;height:6px;background:var(--ink-3);margin:3px auto 0}
+#paceLabel{text-align:center;font-size:15px;color:var(--ink-2);min-height:22px}
+#plannerActions{display:flex;flex-direction:column;gap:10px;padding:14px 24px calc(var(--sab) + 20px);margin-top:auto}
+
+/* ---------- sheets ---------- */
+#backdrop{position:fixed;inset:0;background:rgba(0,0,0,.42);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
+#backdrop.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--glass-sheet);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);border-bottom:0;border-radius:28px 28px 0 0;
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.12), 0 -18px 60px rgba(0,0,0,.45);
+  transform:translateY(104%);transition:transform .34s cubic-bezier(.32,.72,0,1);
+  max-height:calc(100% - var(--sat) - 24px);display:flex;flex-direction:column;
+  padding-bottom:calc(var(--sab) + 16px)}
+.sheet.open{transform:translateY(0)}
+.grabber{width:100%;padding:10px 0 4px;display:flex;justify-content:center;flex:0 0 auto;touch-action:none}
+.grabber::before{content:"";width:40px;height:4px;border-radius:2px;background:var(--glass-hi)}
+.sheetscroll{overflow-y:auto;padding:4px 24px 8px;-webkit-overflow-scrolling:touch}
+.sheethead{display:flex;align-items:flex-start;justify-content:space-between;padding:2px 16px 0 24px}
+.sheethead h2{padding-top:8px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:var(--glass);
+  border:1px solid var(--glass-edge);
+  border-radius:12px;padding:14px;color:var(--ink-2);margin:16px 0;font-variant-numeric:tabular-nums}
+.amberline{color:var(--amber);margin-top:16px}
+
+/* share sheet */
+.segs{display:flex;gap:8px;padding:6px 24px 12px}
+.seg{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--glass-edge);background:var(--glass);font-size:14px;font-weight:600;color:var(--ink-2)}
+.seg.sel{background:var(--glass2);color:var(--ink);border-color:var(--glass-hi);box-shadow:inset 0 1px 0 rgba(255,248,236,.12)}
+#cardPreviewWrap{display:flex;justify-content:center;padding:0 24px}
+#cardPreview{max-width:62%;max-height:38vh;border-radius:10px;border:1px solid var(--line)}
+.themerow{display:flex;gap:10px;padding:14px 24px 4px;justify-content:center}
+.theme{width:52px;height:52px;border-radius:14px;border:2px solid var(--line);position:relative;overflow:hidden}
+.theme.sel{border-color:var(--amber)}
+.theme .lk{position:absolute;right:3px;bottom:3px;font-size:10px;color:var(--ink-2)}
+.tagrow{display:flex;align-items:center;justify-content:space-between;padding:8px 24px;min-height:44px;width:100%;text-align:left}
+.tagrow:active .switch:not(.on){background:var(--ink-3)}
+.tagrow .lab2{font-size:14px;color:var(--ink-2)}
+.switch{width:50px;height:30px;border-radius:15px;background:var(--line);position:relative;transition:background .2s}
+.switch.on{background:var(--amber)}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--ink);transition:transform .2s}
+.switch.on::after{transform:translateX(20px);background:var(--on-amber)}
+.sheetbtns{padding:10px 24px 0;display:flex;flex-direction:column;gap:6px}
+
+/* paywall */
+.motif{display:flex;gap:9px;justify-content:center;padding:16px 0 4px}
+.motif i{width:11px;height:11px;border-radius:50%;background:var(--dot-rest)}
+.paytitle{text-align:center;padding:8px 24px 2px}
+.paysub{text-align:center;color:var(--ink-2);font-size:15px;padding:0 32px}
+.paylist{padding:16px 24px 4px;display:flex;flex-direction:column;gap:14px}
+.payfeat{display:flex;gap:14px;align-items:flex-start}
+.payfeat .ic{width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:var(--glass2);border:1px solid var(--glass-edge);
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.1);display:flex;align-items:center;justify-content:center;color:var(--amber)}
+.payfeat .tx b{font-weight:600}
+.payfeat .tx{font-size:15px;color:var(--ink-2)}
+.payfeat .tx b{color:var(--ink)}
+.plans{padding:12px 24px 4px;display:flex;flex-direction:column;gap:10px}
+.plan{border:1.5px solid var(--glass-edge);background:var(--glass);border-radius:18px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;width:100%;
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.07)}
+.plan.sel{border-color:rgba(232,163,61,.65);background:var(--glass-amber-soft);
+  box-shadow:inset 0 1px 0 rgba(255,235,200,.18), 0 6px 22px rgba(232,163,61,.12)}
+.plan .pt{font-size:16px;font-weight:600}
+.plan .ps{font-size:13px;color:var(--ink-3);margin-top:2px}
+.badge{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--amber);border:1px solid #54401D;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.payfoot{display:flex;justify-content:center;gap:6px;padding-top:12px;flex-wrap:wrap}
+.payfoot button{color:var(--ink-3);font-size:13px;min-height:44px;padding:0 10px}
+.finep{font-size:13px;color:var(--ink-3);text-align:center;padding:10px 32px 0}
+
+/* settings */
+.setrow{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:52px;
+  border-bottom:1px solid var(--line);font-size:16px;text-align:left;color:var(--ink)}
+.setrow .v{color:var(--ink-3);font-size:14px}
+.setrow.danger{color:var(--rose)}
+.setnote{padding:16px 0;color:var(--ink-3);font-size:13px}
+
+/* toast + banner */
+#toast{position:fixed;left:24px;right:24px;bottom:calc(var(--sab) + 24px);z-index:80;background:var(--glass-sheet);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 rgba(255,248,236,.12), 0 12px 40px rgba(0,0,0,.4);
+  color:var(--ink);border-radius:16px;padding:14px 18px;font-size:15px;text-align:center;
+  opacity:0;transform:translateY(12px);transition:opacity .3s,transform .3s;pointer-events:none}
+#toast.on{opacity:1;transform:none}
+#installBanner{position:fixed;left:12px;right:12px;bottom:calc(var(--sab) + 12px);z-index:30;background:var(--glass-sheet);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  box-shadow:inset 0 1px 0 rgba(255,248,236,.12), 0 12px 40px rgba(0,0,0,.4);
+  border:1px solid var(--glass-edge);border-radius:18px;padding:12px 14px;display:none;align-items:center;gap:12px}
+#installBanner.on{display:flex}
+#installBanner .t{flex:1;font-size:14px;color:var(--ink-2)}
+#installBanner button{min-height:44px;padding:0 12px;font-weight:600}
+#installBanner .add{color:var(--amber)}
+.iossteps{padding:8px 24px 12px;display:flex;flex-direction:column;gap:18px}
+.iosstep{display:flex;gap:14px;align-items:center;color:var(--ink-2);font-size:15px}
+.iosstep svg{flex:0 0 34px}
+
+/* short viewports: keep the paywall's price, restore and dismiss above the fold */
+@media (max-height: 760px){
+  .motif{padding:8px 0 0}
+  .paylist{gap:9px;padding-top:10px}
+  .payfeat .tx{font-size:14px}
+  .payfeat .ic{width:30px;height:30px;flex:0 0 30px}
+  .plans{gap:8px}
+  .plan{padding:10px 14px}
+  .finep{padding-top:6px}
+}
+@media (max-height: 700px){
+  #sheet-paywall .sheethead{position:absolute;top:6px;right:6px;padding:0;z-index:2}
+  .motif{display:none}
+  .paytitle{font-size:20px}
+  .paysub{font-size:14px}
+  .paylist{gap:6px}
+  .payfeat .tx{font-size:13px}
+  .plans{gap:6px;padding-top:8px}
+  .plan{padding:8px 14px}
+  .plan .pt{font-size:15px}
+  .plan .ps{font-size:12px}
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ S1 INPUT ============ -->
+<main id="view-input" class="view">
+  <div id="inputBackRow" style="margin:-6px 0 4px -10px" hidden>
+    <button class="iconbtn" id="inputBack" aria-label="Back without saving">&#8249;</button>
+  </div>
+  <div class="microlabel">Last Visits</div>
+  <h1 style="margin-top:10px">Who do you want more time with?</h1>
+
+  <div class="field">
+    <div class="chips" id="whoChips"></div>
+    <div id="customNameWrap" class="field" hidden>
+      <label class="lab" for="customName">Their name</label>
+      <input id="customName" placeholder="Amma, Abuela, Nai Nai" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="lab" id="parentAgeLab" for="parentAge">How old is Mom?</label>
+    <div class="stepper">
+      <button class="stepbtn" id="ageMinus" aria-label="Younger">&minus;</button>
+      <input id="parentAge" inputmode="numeric" pattern="[0-9]*" placeholder="61" maxlength="3" autocomplete="off">
+      <button class="stepbtn" id="agePlus" aria-label="Older">+</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="agerow">
+      <label class="lab" for="userAge" style="margin-bottom:0">And how old are you?</label>
+      <button class="quiet" id="skipAge" style="font-size:13px">Skip &mdash; estimate for me</button>
+    </div>
+    <input id="userAge" inputmode="numeric" pattern="[0-9]*" placeholder="Your age" maxlength="3" autocomplete="off" style="margin-top:10px">
+    <div class="helper">This counts the visits you&rsquo;ve already had.</div>
+    <div class="err" id="ageError"></div>
+  </div>
+
+  <div class="field" style="margin-bottom:135px">
+    <label class="lab" id="freqLab">Honestly, how often do you see Mom?</label>
+    <div class="chips freq" id="freqChips"></div>
+  </div>
+</main>
+<div class="ctabar" id="cta-input">
+  <button class="btn" id="ctaSee" disabled>Show me the number</button>
+  <div class="caption" style="text-align:center;margin-top:10px">Free. No account. Nothing you enter leaves your phone.</div>
+</div>
+
+<!-- ============ S2 REVEAL ============ -->
+<main id="view-reveal" class="view">
+  <div id="revealTopbar">
+    <button class="iconbtn chrome" id="revealClose" aria-label="Close">&times;</button>
+    <div id="revealCounterTop" class="num"></div>
+  </div>
+  <div id="revealCanvasWrap"><canvas id="revealCanvas"></canvas></div>
+  <div id="revealCenter">
+    <div class="caption" id="guessNote">We guessed the amber part &mdash; tap to fix your age.</div>
+    <button class="quiet chrome" id="whyLink">Why this number?</button>
+    <div class="bignum num" id="revealNum"></div>
+    <div id="revealLabel" class="chrome"></div>
+    <div class="caption" id="revealSub"></div>
+    <div id="revealSmall"></div>
+  </div>
+  <div style="flex:1"></div>
+  <div style="padding:0 24px;width:100%;margin-bottom:6px">
+    <div id="revealActions" class="chrome">
+      <button class="btn" id="btnRaise">Raise the number</button>
+      <button class="btn btn-ghost" id="btnCard">Save the card</button>
+    </div>
+  </div>
+</main>
+<button id="revealSkip" hidden>Skip</button>
+
+<!-- ============ EDGE: 100+ ============ -->
+<main id="view-outrun" class="view">
+  <div class="microlabel">Last Visits</div>
+  <div style="flex:1"></div>
+  <h1 id="outrunTitle"></h1>
+  <p id="outrunBody"></p>
+  <div style="flex:1"></div>
+  <button class="btn" id="outrunCta" style="max-width:320px">Start the wall</button>
+  <button class="quiet" id="outrunBack">Back</button>
+</main>
+
+<!-- ============ S3 HOME ============ -->
+<main id="view-home" class="view">
+  <div class="homehead">
+    <div class="caption" id="greeting">Last Visits</div>
+    <button class="iconbtn" id="gearBtn" aria-label="Settings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+    </button>
+  </div>
+  <div id="peopleList"></div>
+  <button class="addcard" id="addPersonBtn">
+    <div class="t">Add someone</div>
+    <div class="s" id="addPersonSub">Everyone you love gets their own wall.</div>
+  </button>
+  <div style="height:40px"></div>
+</main>
+
+<!-- ============ S4 PLANNER ============ -->
+<main id="view-planner" class="view">
+  <div class="pushhead">
+    <button class="iconbtn" id="plannerBack" aria-label="Back">&#8249;</button>
+    <h2>The number isn&rsquo;t fixed</h2>
+  </div>
+  <div id="plannerCanvasWrap"><canvas id="plannerCanvas"></canvas></div>
+  <div id="plannerDelta"><span class="deltachip num" id="deltaChip"></span></div>
+  <div id="plannerSentence"></div>
+  <div class="caption" id="plannerNote" style="text-align:center;padding:0 32px"></div>
+  <div class="sliderzone">
+    <span class="nowtick" id="nowTick">now</span>
+    <input type="range" id="paceSlider" min="0" max="6" step="1" aria-label="Visit pace">
+    <div id="paceLabel"></div>
+  </div>
+  <div id="plannerActions">
+    <button class="btn" id="keepPlanBtn" hidden>Keep this pace</button>
+    <button class="btn btn-ghost" id="shareDeltaBtn" hidden>Share the change</button>
+  </div>
+</main>
+
+<!-- ============ S7 SETTINGS ============ -->
+<main id="view-settings" class="view">
+  <div class="pushhead" style="padding:0">
+    <button class="iconbtn" id="settingsBack" aria-label="Back">&#8249;</button>
+    <h2>Settings</h2>
+  </div>
+  <div id="settingsList" style="margin-top:10px"></div>
+  <div class="setnote">Everything stays on this phone. No account, no cloud, no tracking.</div>
+  <div class="setnote" style="padding-top:0">Made to get you home more often.</div>
+</main>
+
+<!-- ============ SHEETS ============ -->
+<div id="backdrop"></div>
+
+<section class="sheet" id="sheet-why" role="dialog" aria-modal="true" aria-label="Why this number">
+  <div class="grabber"></div>
+  <div class="sheethead"><h2 id="whyTitle">Where the number comes from</h2>
+    <button class="iconbtn sheet-x" aria-label="Close">&times;</button></div>
+  <div class="sheetscroll">
+    <p id="whyBody1" style="color:var(--ink-2)"></p>
+    <div class="mono" id="whyMath"></div>
+    <p style="color:var(--ink-2)" id="whyBody2"></p>
+    <p class="amberline">And the biggest variable is the one you control &mdash; how often you go.</p>
+    <div class="sheetbtns" style="padding:18px 0 0"><button class="btn" id="whyClose">Got it</button></div>
+  </div>
+</section>
+
+<section class="sheet" id="sheet-share" role="dialog" aria-modal="true" aria-label="Share your card">
+  <div class="grabber"></div>
+  <button class="iconbtn sheet-x" aria-label="Close" style="position:absolute;top:8px;right:8px">&times;</button>
+  <div class="segs" style="padding-right:64px">
+    <button class="seg sel" data-fmt="feed">Feed 4:5</button>
+    <button class="seg" data-fmt="story">Story 9:16</button>
+  </div>
+  <div class="sheetscroll" style="padding-left:0;padding-right:0">
+    <div id="cardPreviewWrap"><img id="cardPreview" alt="Your card"></div>
+    <div class="themerow" id="themeRow"></div>
+    <button class="tagrow" id="tagRow" role="switch" aria-checked="false">
+      <span class="lab2">Add &ldquo;What&rsquo;s your number?&rdquo;</span>
+      <span class="switch" id="tagToggle" aria-hidden="true"></span>
+    </button>
+    <div class="sheetbtns">
+      <button class="btn" id="shareBtn">Share</button>
+      <button class="quiet" id="saveImgBtn" style="align-self:center">Save image</button>
+    </div>
+  </div>
+</section>
+
+<section class="sheet" id="sheet-paywall" role="dialog" aria-modal="true" aria-label="More Time">
+  <div class="grabber"></div>
+  <div class="sheethead" style="padding-left:16px"><span></span>
+    <button class="iconbtn sheet-x" aria-label="Close">&times;</button></div>
+  <div class="sheetscroll">
+    <div class="motif" id="payMotif"></div>
+    <div id="payDeltaWrap" style="text-align:center;margin-top:2px" hidden><span class="num" id="payDeltaHint" style="color:var(--amber);font-size:15px;font-weight:600"></span></div>
+    <h2 class="paytitle">Make the number bigger.</h2>
+    <p class="paysub">The reveal is free, always. More Time is for changing what it says.</p>
+    <div class="paylist">
+      <div class="payfeat"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 17l6-6 4 4 6-8"/></svg></div>
+        <div class="tx"><b>The Planner</b> &mdash; see exactly what changes if you visit more</div></div>
+      <div class="payfeat"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div class="tx"><b>Visits &amp; calls</b> &mdash; log them, watch dots re-light, keep your streak</div></div>
+      <div class="payfeat"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M3 20c0-3 2.3-5 5-5s5 2 5 5M11 20c0-3 2.3-5 5-5s5 2 5 5"/></svg></div>
+        <div class="tx"><b>The whole family</b> &mdash; a wall for everyone you love</div></div>
+      <div class="payfeat"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 15l4-4 4 4 4-5 4 4"/></svg></div>
+        <div class="tx"><b>Card themes</b> &mdash; more ways to share your number</div></div>
+    </div>
+    <div class="plans" id="planRows"></div>
+    <div class="sheetbtns"><button class="btn" id="payCta"></button></div>
+    <div class="payfoot" style="padding-top:4px">
+      <button id="payDismiss">Not now</button>
+      <button id="restoreBtn">Restore purchase</button>
+    </div>
+    <div class="finep" id="payFine"></div>
+    <div class="payfoot" style="padding-top:2px">
+      <button data-legal="terms">Terms</button>
+      <button data-legal="privacy">Privacy</button>
+    </div>
+  </div>
+</section>
+
+<section class="sheet" id="sheet-log" role="dialog" aria-modal="true" aria-label="Log a visit">
+  <div class="grabber"></div>
+  <div class="sheethead"><h2>Log a visit</h2>
+    <button class="iconbtn sheet-x" aria-label="Close">&times;</button></div>
+  <div class="sheetscroll">
+    <div class="field" style="margin-top:6px">
+      <label class="lab">When was it?</label>
+      <div class="chips">
+        <button class="chip sel" id="logToday">Today</button>
+        <button class="chip" id="logPick">Pick a date</button>
+      </div>
+      <input type="date" id="logDate" style="margin-top:12px;padding:12px 14px;display:none;color-scheme:dark">
+    </div>
+    <div class="field">
+      <label class="lab" for="logNote">A note, if you want one</label>
+      <input id="logNote" placeholder="diwali at home" maxlength="60" autocomplete="off" style="padding:12px 14px">
+    </div>
+    <div class="sheetbtns" style="padding:20px 0 0"><button class="btn" id="logSave">Save</button></div>
+  </div>
+</section>
+
+<section class="sheet" id="sheet-ios" role="dialog" aria-modal="true" aria-label="Add to Home Screen">
+  <div class="grabber"></div>
+  <div class="sheethead"><h2>Add to your Home Screen</h2>
+    <button class="iconbtn sheet-x" aria-label="Close">&times;</button></div>
+  <div class="sheetscroll">
+    <div class="iossteps">
+      <div class="iosstep">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="12" width="16" height="15" rx="3"/><path d="M17 5v13M13 8l4-3.6L21 8"/></svg>
+        <span>Tap the Share button in your browser&rsquo;s toolbar.</span>
+      </div>
+      <div class="iosstep">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round"><rect x="7" y="7" width="20" height="20" rx="5"/><path d="M17 12.5v9M12.5 17h9"/></svg>
+        <span>Choose &ldquo;Add to Home Screen.&rdquo; The wall will be one tap away.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sheet" id="sheet-legal" role="dialog" aria-modal="true" aria-label="Legal">
+  <div class="grabber"></div>
+  <div class="sheethead"><h2 id="legalTitle"></h2>
+    <button class="iconbtn sheet-x" aria-label="Close">&times;</button></div>
+  <div class="sheetscroll"><p style="color:var(--ink-2);padding-bottom:12px" id="legalBody"></p></div>
+</section>
+
+<div id="installBanner">
+  <span class="t">Keep your number close &mdash; add Last Visits to your home screen.</span>
+  <button id="installLater">Later</button>
+  <button class="add" id="installAdd">Add</button>
+</div>
+
+<div id="toast" role="status"></div>
+<a id="dl" hidden></a>
+
+<script>
+'use strict';
+/* =====================================================================
+   Last Visits — fully client-side. Nothing leaves the device.
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+/* ---------------- payments config (drop keys here later; nothing else changes) ---------------- */
+const PAYMENTS = {
+  enabled: false,               // flip when Stripe/RevenueCat keys exist
+  links: { weekly: null, annual: null, lifetime: null }
+};
+const Premium = {
+  KEY: 'lv_premium',
+  isActive() {
+    try { const v = JSON.parse(localStorage.getItem(this.KEY)); return !!(v && v.active); }
+    catch (e) { return false; }
+  },
+  grant(plan, source) {
+    localStorage.setItem(this.KEY, JSON.stringify({ active: true, plan, source, since: new Date().toISOString() }));
+    document.dispatchEvent(new CustomEvent('premiumchange'));
+  }
+};
+async function unlockPremium(plan /* 'weekly' | 'annual' | 'lifetime' */) {
+  if (!PAYMENTS.enabled) {
+    Premium.grant(plan, 'stub');   // early access: honest free grant, no fake charge ever
+    return { ok: true, source: 'stub' };
+  }
+  const link = PAYMENTS.links[plan];
+  if (!link) { toast('That plan isn’t available yet.'); return { ok: false }; }
+  // checkout must redirect back with ?premium=<plan>; handled at boot
+  window.location.href = link;
+  return { ok: false, source: 'redirect' };
+}
+
+/* ---------------- data ---------------- */
+const FREQS = [
+  { id: 'fewyears',  label: 'Every few years',     py: 0.5 },
+  { id: 'yearly',    label: 'Once a year',          py: 1 },
+  { id: 'twice',     label: 'Twice a year',         py: 2 },
+  { id: 'fewtimes',  label: 'A few times a year',   py: 4 },
+  { id: 'cmonths',   label: 'Every couple months',  py: 6 },
+  { id: 'monthly',   label: 'Monthly',              py: 12 },
+  { id: 'weekly',    label: 'Weekly+',              py: 45 }
+];
+const WHO = [
+  { id: 'mom',     label: 'Mom',     sex: 'f' },
+  { id: 'dad',     label: 'Dad',     sex: 'm' },
+  { id: 'grandma', label: 'Grandma', sex: 'f' },
+  { id: 'grandpa', label: 'Grandpa', sex: 'm' },
+  { id: 'custom',  label: 'Someone else', sex: 'b' }
+];
+/* Approximate SSA period life table — remaining years, anchors at ages 20..110 (step 5).
+   Values are deliberately approximate; the app labels every output an estimate. */
+const LIFE = {
+  f: [61.9, 57.1, 52.4, 47.6, 42.9, 38.3, 33.8, 29.5, 25.3, 21.2, 17.3, 13.7, 10.4, 7.6, 5.3, 3.7, 2.6, 1.9, 1.4],
+  m: [57.0, 52.3, 47.8, 43.2, 38.7, 34.2, 29.9, 25.7, 21.7, 18.0, 14.5, 11.3, 8.5, 6.2, 4.4, 3.1, 2.2, 1.6, 1.2]
+};
+function eYears(age, sex) {
+  const a = clamp(age, 20, 110);
+  const idx = (a - 20) / 5, i0 = Math.min(17, Math.floor(idx)), fr = idx - i0;
+  const pick = t => t[i0] + (t[i0 + 1] - t[i0]) * fr;
+  if (sex === 'f') return pick(LIFE.f);
+  if (sex === 'm') return pick(LIFE.m);
+  return (pick(LIFE.f) + pick(LIFE.m)) / 2;
+}
+
+/* ---------------- state ---------------- */
+const DEFAULTS = { people: [], flags: { paywallAuto: false, tasteUsed: false, shared: false, sessions: 0, installDismissCount: 0, installDismissAt: 0 }, draft: null };
+let state;
+try { state = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem('lv_state') || 'null') || {}); }
+catch (e) { state = JSON.parse(JSON.stringify(DEFAULTS)); }
+state.flags = Object.assign({}, DEFAULTS.flags, state.flags || {});
+if (!Array.isArray(state.people)) state.people = [];
+
+/* Durability (AUDIT PWA-2): localStorage is evictable under storage pressure /
+   Safari ITP. Mirror state into IndexedDB and restore from it when localStorage
+   comes back empty; ask for persistent storage once real data exists. */
+const IDB = {
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('lv', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    });
+  },
+  async set(k, v) { try { const db = await this.open(); const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); } catch (e) {} },
+  async get(k) {
+    try {
+      const db = await this.open();
+      return await new Promise((res, rej) => { const r = db.transaction('kv').objectStore('kv').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    } catch (e) { return undefined; }
+  }
+};
+const save = () => {
+  try { localStorage.setItem('lv_state', JSON.stringify(state)); } catch (e) {}
+  if (window.indexedDB) IDB.set('lv_state', JSON.stringify(state));
+  if (state.people.length && navigator.storage && navigator.storage.persist && !save._p) { save._p = true; navigator.storage.persist().catch(() => {}); }
+};
+if (!state.people.length && window.indexedDB) {
+  IDB.get('lv_state').then(v => {
+    if (!v) return;
+    try {
+      const rec = Object.assign({}, DEFAULTS, JSON.parse(v) || {});
+      if (Array.isArray(rec.people) && rec.people.length && !state.people.length) {
+        state = rec; state.flags = Object.assign({}, DEFAULTS.flags, state.flags || {});
+        try { localStorage.setItem('lv_state', v); } catch (e) {}
+        if (typeof goHome === 'function' && document.readyState === 'complete') goHome();
+        else addEventListener('load', () => { if (state.people.length) goHome(); }, { once: true });
+      }
+    } catch (e) {}
+  });
+}
+
+const freqOf = id => FREQS.find(f => f.id === id) || FREQS[2];
+const freqIdx = id => Math.max(0, FREQS.findIndex(f => f.id === id));
+const lower = s => s === 'Weekly+' ? 'weekly' : s.toLowerCase();
+
+function effFreqId(p) {
+  if (p.plan && p.plan.freqId) {
+    const confirmed = (p.logs || []).some(l => l.t === 'v' && l.at >= p.plan.setAt);
+    if (confirmed) return p.plan.freqId;
+  }
+  return p.freqId;
+}
+function personModel(p, overrideFreqId) {
+  const fq = freqOf(overrideFreqId || effFreqId(p));
+  const years = Math.ceil(eYears(p.parentAge, p.sex));
+  const left = Math.max(1, Math.ceil(years * fq.py));
+  const uAge = p.userAge != null ? p.userAge : clamp(p.parentAge - 28, 13, 100);
+  const since = Math.max(0, uAge - 18);
+  const soFar = Math.max(0, Math.round(since * fq.py));
+  const total = soFar + left;
+  let unit = 1, soFarDots = soFar, leftDots = left, unitLabel = '';
+  if (total > 2200) {
+    unit = 'month'; soFarDots = Math.round(since * 12); leftDots = years * 12;
+    unitLabel = 'each dot is a month together';
+  } else if (total > 440) {
+    unit = 5; soFarDots = Math.ceil(soFar / 5); leftDots = Math.ceil(left / 5);
+    unitLabel = 'each dot is 5 visits';
+  }
+  let tier = 'normal';
+  if (p.parentAge >= 100) tier = 'outrun';
+  else if (p.parentAge >= 95) tier = 'floor';
+  else if (left <= 4) tier = 'small';
+  return { fq, years, left, soFar, uAge, unit, soFarDots, leftDots, unitLabel, tier, ageGuessed: p.userAge == null };
+}
+
+/* ---------------- grid geometry (shared by reveal, cards, thumbs, planner) ---------------- */
+function fitGrid(total, maxW, maxH, prefDot, prefGap, maxDot) {
+  prefDot = prefDot || 10; prefGap = prefGap || 7;
+  total = Math.max(1, Math.round(total));
+  maxDot = maxDot || prefDot * 2.5;                 // dots may grow to fill the box, up to this cap
+  const gr = prefGap / (prefDot + prefGap);         // gap share of a cell
+  const maxUnit = maxDot / (1 - gr);
+  // choose the column count that yields the biggest dots inside maxW × maxH,
+  // tie-breaking toward a squarish wall; cols never exceed the dot count
+  const target = Math.sqrt(total * maxW / Math.max(40, maxH));
+  let best = null;
+  const cMax = Math.min(total, 120);
+  for (let c = 1; c <= cMax; c++) {
+    const r = Math.ceil(total / c);
+    const u = Math.min(maxUnit, maxW / (c - gr), maxH / (r - gr));
+    const score = u - Math.abs(c - target) * 0.02;
+    if (!best || score > best.score) best = { c, r, u, score };
+  }
+  const cols = best.c, rows = best.r, unit = Math.max(4, best.u);
+  const dot = Math.max(3, unit * (1 - gr));
+  const w = cols * unit - (unit - dot), h = rows * unit - (unit - dot);
+  return { cols, rows, unit, dot, w, h };
+}
+/* stateFn(i) -> {c:color, a:alpha, glow:0|px, ring:bool} or null to skip */
+function drawWall(ctx, geo, total, ox, oy, stateFn) {
+  for (let i = 0; i < total; i++) {
+    const st = stateFn(i);
+    if (!st) continue;
+    const x = ox + (i % geo.cols) * geo.unit + geo.dot / 2;
+    const y = oy + Math.floor(i / geo.cols) * geo.unit + geo.dot / 2;
+    ctx.globalAlpha = st.a != null ? st.a : 1;
+    ctx.beginPath();
+    ctx.arc(x, y, geo.dot / 2, 0, 6.2832);
+    if (st.ring) { ctx.lineWidth = Math.max(1, geo.dot * .12); ctx.strokeStyle = st.c; ctx.stroke(); }
+    else {
+      if (st.glow) { ctx.shadowColor = st.c; ctx.shadowBlur = st.glow; }
+      ctx.fillStyle = st.c; ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* ---------------- views / router ---------------- */
+const VIEWS = ['view-input', 'view-reveal', 'view-outrun', 'view-home', 'view-planner', 'view-settings'];
+let currentView = null;
+function show(id) {
+  VIEWS.forEach(v => $(v).classList.toggle('active', v === id));
+  $('cta-input').classList.toggle('on', id === 'view-input');
+  currentView = id;
+  // never let the reveal's animation loops keep painting behind another view
+  if (id !== 'view-reveal') { cancelAnimationFrame(RV.raf); cancelAnimationFrame(RV.pulseRaf); }
+  // the install banner lives on home only — never over reveal, planner or input
+  if (id !== 'view-home') $('installBanner').classList.remove('on');
+  window.scrollTo(0, 0);
+}
+
+/* ---------------- toast ---------------- */
+let toastT = null;
+function toast(msg, ms) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), ms || 2600);
+}
+
+/* ---------------- sheets ---------------- */
+let openSheets = [];
+function openSheet(id) {
+  const s = $(id);
+  $('backdrop').classList.add('on');
+  s.classList.add('open');
+  if (!openSheets.includes(id)) openSheets.push(id);
+  const f = s.querySelector('.btn, button'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 350);
+}
+function closeSheet(id) {
+  const s = $(id); s.classList.remove('open'); s.style.bottom = '';
+  openSheets = openSheets.filter(x => x !== id);
+  if (!openSheets.length) $('backdrop').classList.remove('on');
+  onSheetClosed(id);
+}
+function closeTopSheet() { if (openSheets.length) closeSheet(openSheets[openSheets.length - 1]); }
+$('backdrop').addEventListener('click', closeTopSheet);
+/* keyboard-aware sheets: lift the open sheet above the on-screen keyboard */
+if (window.visualViewport) {
+  const vv = window.visualViewport;
+  const lift = () => {
+    const kb = Math.max(0, innerHeight - vv.height - vv.offsetTop);
+    document.querySelectorAll('.sheet.open').forEach(s => { s.style.bottom = kb + 'px'; });
+  };
+  vv.addEventListener('resize', lift);
+  vv.addEventListener('scroll', lift);
+}
+document.addEventListener('focusin', e => {
+  if (e.target.closest && e.target.closest('.sheetscroll'))
+    setTimeout(() => { try { e.target.scrollIntoView({ block: 'center' }); } catch (x) {} }, 300);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTopSheet(); });
+document.querySelectorAll('.sheet-x').forEach(b => b.addEventListener('click', e => {
+  closeSheet(e.target.closest('.sheet').id);
+}));
+/* swipe-down on grabber */
+document.querySelectorAll('.sheet').forEach(sh => {
+  const g = sh.querySelector('.grabber');
+  let y0 = null;
+  g.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, { passive: true });
+  g.addEventListener('touchmove', e => {
+    if (y0 == null) return;
+    const dy = Math.max(0, e.touches[0].clientY - y0);
+    sh.style.transform = 'translateY(' + dy + 'px)';
+  }, { passive: true });
+  g.addEventListener('touchend', e => {
+    const dy = Math.max(0, e.changedTouches[0].clientY - (y0 || 0));
+    sh.style.transform = '';
+    if (dy > 90) closeSheet(sh.id);
+    y0 = null;
+  });
+  /* focus trap (light) */
+  sh.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const els = sh.querySelectorAll('button, input, [tabindex]');
+    if (!els.length) return;
+    const first = els[0], last = els[els.length - 1];
+    if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+    else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+  });
+});
+
+/* =====================================================================
+   S1 — INPUT
+   ===================================================================== */
+const draft = () => state.draft || (state.draft = { whoId: 'mom', name: '', parentAge: null, userAge: null, userSkipped: false, freqId: null });
+let editingId = null; // person id when editing, else null (new)
+
+function personName(p) { return p.whoId === 'custom' ? p.name : WHO.find(w => w.id === p.whoId).label; }
+function cardName(p) { // "my mom" vs custom name
+  return p.whoId === 'custom' ? p.name : 'my ' + WHO.find(w => w.id === p.whoId).label.toLowerCase();
+}
+
+function renderWhoChips() {
+  const d = draft();
+  $('whoChips').innerHTML = '';
+  WHO.forEach(w => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (d.whoId === w.id ? ' sel' : '');
+    b.textContent = w.label;
+    b.onclick = () => { d.whoId = w.id; save(); renderWhoChips(); syncInputLabels(); validateInput(); };
+    $('whoChips').appendChild(b);
+  });
+  $('customNameWrap').hidden = d.whoId !== 'custom';
+}
+function renderFreqChips() {
+  const d = draft();
+  $('freqChips').innerHTML = '';
+  FREQS.forEach(f => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (d.freqId === f.id ? ' sel' : '');
+    b.textContent = f.label;
+    b.onclick = () => { d.freqId = f.id; save(); renderFreqChips(); validateInput(); };
+    $('freqChips').appendChild(b);
+  });
+}
+function inputDisplayName() {
+  const d = draft();
+  if (d.whoId === 'custom') return (d.name || '').trim() || 'them';
+  return WHO.find(w => w.id === d.whoId).label;
+}
+function syncInputLabels() {
+  const n = inputDisplayName();
+  $('parentAgeLab').textContent = n === 'them' ? 'How old are they?' : 'How old is ' + n + '?';
+  $('freqLab').textContent = 'Honestly, how often do you see ' + (n === 'them' ? 'them' : n) + '?';
+}
+function validateInput() {
+  const d = draft();
+  const err = $('ageError');
+  let msg = '';
+  const pa = d.parentAge, ua = d.userAge;
+  if (pa != null && (pa < 20 || pa > 110)) msg = 'We can only do honest math for ages 20 to 110.';
+  else if (ua != null && (ua < 13 || ua > 100)) msg = 'Enter your age, 13 to 100.';
+  else if (pa != null && ua != null && ua >= pa) msg = 'It looks like you’re older than ' + inputDisplayName() + '. Mind checking the ages?';
+  else if (pa != null && ua != null && pa - ua < 12) msg = 'Those ages are very close. This works best for someone at least a bit older than you — worth a check?';
+  err.textContent = msg; err.classList.toggle('on', !!msg);
+  const needName = d.whoId === 'custom' && !(d.name || '').trim();
+  const ok = !msg && pa != null && d.freqId && !needName && (ua != null || d.userSkipped || true);
+  // user age is optional; skip link just clears it
+  $('ctaSee').disabled = !(pa != null && d.freqId && !msg && !needName);
+  return !$('ctaSee').disabled;
+}
+$('customName').addEventListener('input', e => { draft().name = e.target.value; save(); syncInputLabels(); validateInput(); });
+$('parentAge').addEventListener('input', e => {
+  const v = e.target.value.replace(/\D/g, ''); e.target.value = v;
+  draft().parentAge = v ? +v : null; save(); validateInput();
+});
+$('userAge').addEventListener('input', e => {
+  const v = e.target.value.replace(/\D/g, ''); e.target.value = v;
+  draft().userAge = v ? +v : null; draft().userSkipped = false; save(); validateInput();
+});
+$('ageMinus').onclick = () => { const d = draft(); d.parentAge = clamp((d.parentAge || 62) - 1, 20, 110); $('parentAge').value = d.parentAge; save(); validateInput(); };
+$('agePlus').onclick = () => { const d = draft(); d.parentAge = clamp((d.parentAge || 60) + 1, 20, 110); $('parentAge').value = d.parentAge; save(); validateInput(); };
+$('skipAge').onclick = () => { const d = draft(); d.userAge = null; d.userSkipped = true; $('userAge').value = ''; save(); validateInput(); toast('We’ll estimate it. You can fix it anytime.'); };
+
+let editReturn = null; // view to go back to when editing is discarded or unchanged
+function editExit() {
+  if (editReturn === 'view-settings') { renderSettings(); show('view-settings'); }
+  else goHome();
+}
+function openInput(person) {
+  editingId = person ? person.id : null;
+  editReturn = person ? currentView : null;
+  if (person) {
+    state.draft = { whoId: person.whoId, name: person.name || '', parentAge: person.parentAge, userAge: person.userAge, userSkipped: person.userAge == null, freqId: person.freqId };
+  }
+  $('inputBackRow').hidden = !editingId && !state.people.length;
+  const d = draft();
+  $('customName').value = d.name || '';
+  $('parentAge').value = d.parentAge != null ? d.parentAge : '';
+  $('userAge').value = d.userAge != null ? d.userAge : '';
+  renderWhoChips(); renderFreqChips(); syncInputLabels(); validateInput();
+  show('view-input');
+}
+$('inputBack').onclick = () => {
+  state.draft = null; editingId = null; save();
+  editExit();
+};
+$('ctaSee').onclick = () => {
+  if (!validateInput()) return;
+  const d = draft();
+  let p, unchanged = false;
+  if (editingId) {
+    p = state.people.find(x => x.id === editingId);
+    unchanged = p.whoId === d.whoId && (p.name || '') === (d.name || '').trim() &&
+      p.parentAge === d.parentAge && p.userAge === d.userAge && p.freqId === d.freqId;
+    Object.assign(p, { whoId: d.whoId, name: (d.name || '').trim(), sex: WHO.find(w => w.id === d.whoId).sex, parentAge: d.parentAge, userAge: d.userAge, freqId: d.freqId });
+  } else {
+    p = { id: 'p' + Date.now(), whoId: d.whoId, name: (d.name || '').trim(), sex: WHO.find(w => w.id === d.whoId).sex,
+      parentAge: d.parentAge, userAge: d.userAge, freqId: d.freqId, plan: null, logs: [], freeWall: false, createdAt: Date.now() };
+    state.people.push(p);
+  }
+  if (p.parentAge >= 100) p.freeWall = true; // 100+ always gets free logging, promised or not
+  state.draft = null; save();
+  if (unchanged) { editingId = null; editExit(); return; }
+  if (p.parentAge >= 100) { openOutrun(p); return; }
+  startReveal(p, !state.flags.revealDone);
+};
+
+/* =====================================================================
+   EDGE 100+ — "outrun the math"
+   ===================================================================== */
+let outrunPerson = null;
+function openOutrun(p) {
+  outrunPerson = p;
+  $('outrunTitle').textContent = personName(p) + ' has outrun the math.';
+  $('outrunBody').textContent = 'Past 100, estimates stop meaning much, so we won’t show you one. We’ll help you count something better: visits, logged and kept.';
+  show('view-outrun');
+}
+$('outrunCta').onclick = () => { if (outrunPerson) { outrunPerson.freeWall = true; save(); } goHome(); };
+$('outrunBack').onclick = () => openInput(outrunPerson);
+
+/* =====================================================================
+   S2 — REVEAL
+   ===================================================================== */
+const RV = { raf: 0, person: null, model: null, geo: null, done: false, t0: 0, fast: false, pulseRaf: 0 };
+
+function revealColors() { return { ph: '#1C1B19', amber: '#E8A33D', ember: '#6E4E1E', white: '#FFF8EC', rest: '#2E2B26' }; }
+
+function setChrome(on) {
+  document.querySelectorAll('#view-reveal .chrome').forEach(el => el.classList.toggle('show', on));
+}
+function startReveal(p, first) {
+  RV.person = p; RV.model = personModel(p); RV.done = false; RV.fast = !first && !RM;
+  cancelAnimationFrame(RV.raf); cancelAnimationFrame(RV.pulseRaf);
+  show('view-reveal');
+  setChrome(false);
+  $('revealNum').textContent = '';
+  $('revealLabel').textContent = 'more visits with ' + personName(p);
+  $('revealSub').textContent = ''; $('revealSmall').style.display = 'none';
+  $('revealCounterTop').textContent = '';
+  $('guessNote').style.display = 'none';
+  $('revealSkip').hidden = RM;
+
+  const m = RV.model;
+  const wrap = $('revealCanvasWrap');
+  const cw = Math.min(innerWidth, 500) - 48;
+  const maxH = Math.floor(innerHeight * (innerHeight < 700 ? .34 : .42)); // short phones: number + both actions stay above the fold
+  const total = m.soFarDots + m.leftDots;
+  RV.geo = fitGrid(total, cw, maxH, 10, 7, 34);
+  const cv = $('revealCanvas'), dpr = Math.min(2.5, devicePixelRatio || 1);
+  cv.width = Math.ceil(RV.geo.w * dpr); cv.height = Math.ceil(RV.geo.h * dpr);
+  cv.style.width = RV.geo.w + 'px'; cv.style.height = RV.geo.h + 'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  if (RM) { finishReveal(true); return; }
+
+  // timeline
+  const floodDur = RV.fast ? 800 : 1600;
+  const tPlace = RV.fast ? 120 : 400;                    // placeholders done
+  const tFloodEnd = tPlace + floodDur;
+  const tDim = tFloodEnd + 300;                          // stillness then dim
+  const tWhiteStart = tDim + 260;
+  // white ignition is a bounded phase (~2s), never per-dot-floored: dense walls ignite many dots per frame
+  const wInt = Math.min(90, (RV.fast ? 1200 : 2000) / Math.max(1, m.leftDots));
+  const tWhiteEnd = tWhiteStart + m.leftDots * wInt;
+  const C = revealColors();
+  const easeIn = x => x * x;
+  let lastRow = -1;
+  RV.t0 = performance.now();
+
+  function frame(now) {
+    const t = now - RV.t0;
+    ctx.clearRect(0, 0, RV.geo.w, RV.geo.h);
+    const placeP = clamp(t / tPlace, 0, 1);
+    const floodP = clamp((t - tPlace) / floodDur, 0, 1);
+    const lit = Math.floor(easeIn(floodP) * m.soFarDots);
+    const dimP = clamp((t - tFloodEnd - 300) / 260, 0, 1);
+    const whiteN = t < tWhiteStart ? 0 : Math.min(m.leftDots, Math.floor((t - tWhiteStart) / wInt) + 1);
+    const amberC = dimP <= 0 ? C.amber : blend(C.amber, C.ember, dimP);
+    drawWall(ctx, RV.geo, total, 0, 0, i => {
+      const row = Math.floor(i / RV.geo.cols);
+      const rowIn = row / RV.geo.rows <= placeP;
+      if (i < m.soFarDots) {
+        if (i < lit) return { c: amberC };
+        return rowIn ? { c: C.ph } : null;
+      }
+      const li = i - m.soFarDots;
+      if (li < whiteN) return { c: C.white, glow: Math.min(5, RV.geo.dot * .5), a: 1 };
+      return rowIn ? { c: C.ph } : null;
+    });
+    // haptic per row during flood
+    const litRow = Math.floor(lit / RV.geo.cols);
+    if (litRow !== lastRow && floodP > 0 && floodP < 1) { lastRow = litRow; buzz(4); }
+    // live counter
+    if (floodP > 0 && t < tDim + 600) {
+      const v = m.unit === 'month' ? lit + ' months together'
+        : Math.min(m.soFar, Math.round(lit * (m.unit === 5 ? 5 : 1))) + ' visits so far';
+      $('revealCounterTop').textContent = lit > 0 ? v : '';
+    } else if (t >= tDim + 600) $('revealCounterTop').textContent = '';
+
+    if (t >= tWhiteEnd) { finishReveal(false); return; }
+    RV.raf = requestAnimationFrame(frame);
+  }
+  RV.raf = requestAnimationFrame(frame);
+}
+function blend(c1, c2, p) {
+  const h = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+  const a = h(c1), b = h(c2);
+  const m = a.map((v, i) => Math.round(v + (b[i] - v) * p));
+  return 'rgb(' + m.join(',') + ')';
+}
+function finishReveal(instant) {
+  cancelAnimationFrame(RV.raf);
+  RV.done = true;
+  $('revealSkip').hidden = true;
+  $('revealCounterTop').textContent = '';
+  const m = RV.model, p = RV.person, C = revealColors();
+  const cv = $('revealCanvas'), ctx = cv.getContext('2d');
+  const total = m.soFarDots + m.leftDots;
+
+  // steady-state painter with pulse
+  const paint = pulseA => {
+    ctx.clearRect(0, 0, RV.geo.w, RV.geo.h);
+    drawWall(ctx, RV.geo, total, 0, 0, i => {
+      if (i < m.soFarDots) return { c: C.ember };
+      return { c: C.white, glow: Math.min(5, RV.geo.dot * .5), a: pulseA };
+    });
+  };
+  paint(1);
+  const pt0 = performance.now();
+  if (!RM) {
+    const pulse = now => {
+      const a = .62 + .38 * (0.5 + 0.5 * Math.cos((now - pt0) / 3000 * 6.2832));
+      paint(a);
+      RV.pulseRaf = requestAnimationFrame(pulse);
+    };
+    RV.pulseRaf = requestAnimationFrame(pulse);
+  }
+
+  // counter roll
+  const n = m.left;
+  const numEl = $('revealNum');
+  if (instant || RM) { numEl.textContent = n; revealChromeIn(); }
+  else {
+    const start = Math.max(n + 9, Math.round(n * 2.6)), rt0 = performance.now(), dur = 650;
+    const roll = now => {
+      const pr = clamp((now - rt0) / dur, 0, 1);
+      const e = 1 - Math.pow(1 - pr, 3);
+      numEl.textContent = Math.round(start + (n - start) * e);
+      numEl.style.filter = 'blur(' + (6 * (1 - e)) + 'px)';
+      if (pr < 1) requestAnimationFrame(roll);
+      else { numEl.style.filter = ''; buzz(10); setTimeout(revealChromeIn, 450); }
+    };
+    requestAnimationFrame(roll);
+  }
+  // sub copy
+  let sub = 'About ' + n + '. An estimate — and we rounded up on purpose.';
+  if (m.tier === 'floor') sub = 'Past 95 the tables get unreliable in ' + personName(p) + '’s favor — people who get this far tend to keep going. Read this as a floor, not a forecast.';
+  if (m.unitLabel) sub += ' ' + m.unitLabel.charAt(0).toUpperCase() + m.unitLabel.slice(1) + '.';
+  $('revealSub').textContent = sub;
+  if (m.tier === 'small') {
+    $('revealSmall').textContent = 'Small numbers move the most. One habit change can double this.';
+    $('revealSmall').style.display = 'block';
+  }
+  if (m.ageGuessed) $('guessNote').style.display = 'block';
+}
+function revealChromeIn() {
+  setChrome(true);
+  state.flags.revealDone = true; save();
+  // auto-paywall: once per lifetime, ≥6s after the reveal settles, never over another sheet
+  if (!Premium.isActive() && !state.flags.paywallAuto) {
+    const tryOpen = tries => {
+      if (state.flags.paywallAuto || Premium.isActive()) return;
+      if (openSheets.length || (currentView !== 'view-reveal' && currentView !== 'view-home')) {
+        if (tries > 0) setTimeout(() => tryOpen(tries - 1), 4000);
+        return;
+      }
+      state.flags.paywallAuto = true; save();
+      openPaywall('auto');
+    };
+    setTimeout(() => tryOpen(3), 6000);
+  }
+}
+$('revealSkip').onclick = () => { if (!RV.done) finishReveal(true); };
+$('revealClose').onclick = goHome;
+$('guessNote').onclick = () => openInput(RV.person);
+$('whyLink').onclick = () => openWhy(RV.person);
+$('btnRaise').onclick = () => enterPlanner(RV.person);
+$('btnCard').onclick = () => openShare(RV.person, null);
+
+/* =====================================================================
+   Sheet A — WHY
+   ===================================================================== */
+function openWhy(p) {
+  const m = personModel(p);
+  $('whyTitle').textContent = 'Where ' + m.left + ' comes from';
+  $('whyBody1').textContent = 'We start with how many years the average ' + p.parentAge +
+    '-year-old American has ahead, from the Social Security Administration’s period life tables. ' +
+    'We take the generous side and round up. Then we multiply by your pace: ' + lower(m.fq.label) +
+    '. Two numbers, honestly multiplied.';
+  $('whyMath').textContent = '~' + m.years + ' more years × ' + lower(m.fq.label) + ' ≈ ' + m.left + ' → we show “about ' + m.left + '”';
+  $('whyBody2').textContent = 'It’s an estimate. Plenty of people outrun the tables, and we hope ' + personName(p) +
+    ' is one of them. The number can’t predict anything. It’s for deciding things. We start counting from when you moved out — childhood lives outside the wall.';
+  openSheet('sheet-why');
+}
+$('whyClose').onclick = () => closeSheet('sheet-why');
+
+/* =====================================================================
+   Sheet B — SHARE CARD
+   ===================================================================== */
+const CARD_THEMES = [
+  { id: 'ember', name: 'Ember', free: true,  ground: '#0F0E0C', had: '#6E4E1E', bright: '#E8A33D', left: '#FFF8EC', ink: '#F4EFE6', sub: '#A69E90', faint: '#6E675C', brand: '#3A3833', grain: false },
+  { id: 'ivory', name: 'Ivory', free: false, ground: '#F6F1E7', had: '#DCC490', bright: '#8A5710', left: '#C9821E', ink: '#23201B', sub: '#6F685D', faint: '#9B9385', brand: '#B4AA97', grain: false, light: true },
+  { id: 'dusk',  name: 'Dusk',  free: false, ground: '#101623', had: '#5A4038', bright: '#D98B7E', left: '#EDF2FF', ink: '#EDF2FF', sub: '#8E97AD', faint: '#5A6378', brand: '#333C52', grain: false },
+  { id: 'grain', name: 'Grain', free: false, ground: '#0F0E0C', had: '#6E4E1E', bright: '#E8A33D', left: '#FFF8EC', ink: '#F4EFE6', sub: '#A69E90', faint: '#6E675C', brand: '#3A3833', grain: true }
+];
+const SHARE = { person: null, delta: null, fmt: 'feed', theme: 'ember', tag: false };
+
+function renderCardCanvas(o) {
+  const th = CARD_THEMES.find(t => t.id === o.theme) || CARD_THEMES[0];
+  const W = 1080, H = o.fmt === 'story' ? 1920 : 1350;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  x.fillStyle = th.ground; x.fillRect(0, 0, W, H);
+  // vignette (kept subtle on light grounds — a strong lift reads as a hotspot)
+  const vg = x.createRadialGradient(W / 2, H * .42, 80, W / 2, H * .42, H * .62);
+  const lift = th.light ? 'rgba(255,255,255,0.15)' : 'rgba(255,244,220,0.05)';
+  vg.addColorStop(0, lift); vg.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = vg; x.fillRect(0, 0, W, H);
+
+  const m = o.model, p = o.person;
+  const isDelta = !!o.delta;
+  const serif = '"New York", ui-serif, Georgia, serif';
+  const sans = '-apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif';
+
+  // wordmark
+  x.textAlign = 'center'; x.fillStyle = th.faint;
+  x.font = '600 30px ' + sans;
+  const track = t => t.split('').join('  ');
+  const wmY = o.fmt === 'story' ? 300 : 140;
+  x.save(); x.letterSpacing = '4px';
+  x.fillText('L A S T   V I S I T S', W / 2, wmY);
+  x.restore();
+
+  // grid — vertically centered inside its zone
+  const gTop0 = o.fmt === 'story' ? 380 : 210;
+  const gMaxH = o.fmt === 'story' ? 800 : 545;
+  const extra = isDelta && o.delta.d > 0 ? o.delta.simLeftDots - m.leftDots : 0;
+  const total = m.soFarDots + m.leftDots + Math.max(0, extra);
+  const geo = fitGrid(total, 888, gMaxH, 26, 18, 64);
+  const gx = (W - geo.w) / 2;
+  const gTop = gTop0 + Math.max(0, (gMaxH - geo.h) / 2);
+  const wGlow = th.light ? 0 : Math.min(10, geo.dot * .45); // glow only works on dark grounds
+  drawWall(x, geo, total, gx, gTop, i => {
+    if (i < m.soFarDots) return { c: th.had };
+    const li = i - m.soFarDots;
+    if (isDelta && o.delta.d < 0) { // fewer: dim the trailing dots to rings
+      if (li >= m.leftDots + o.delta.d) return { c: th.faint, ring: true };
+      return { c: th.left, glow: wGlow, a: 1 };
+    }
+    if (li < m.leftDots) return { c: th.left, glow: wGlow, a: 1 };
+    return { c: th.bright, glow: th.light ? 0 : Math.min(10, geo.dot * .5) }; // re-ignited delta dots
+  });
+
+  // number
+  const n = isDelta ? (o.delta.d > 0 ? '+' + o.delta.d : '−' + Math.abs(o.delta.d)) : String(m.left);
+  const numSize = o.fmt === 'story' ? 400 : 320;
+  x.fillStyle = isDelta && o.delta.d > 0 ? th.bright : th.ink;
+  x.font = '600 ' + numSize + 'px ' + serif;
+  const numY = o.fmt === 'story' ? 1560 : 1085;
+  x.fillText(n, W / 2, numY);
+
+  // statement
+  x.fillStyle = th.sub; x.font = '500 54px ' + sans;
+  const stY = o.fmt === 'story' ? 1650 : 1175;
+  x.fillText(isDelta ? 'more visits — I changed the math' : 'more visits with ' + cardName(p), W / 2, stY);
+
+  // footnote (the credibility line)
+  x.fillStyle = th.faint; x.font = '400 30px ' + sans;
+  let fn = isDelta
+    ? lower(freqOf(effFreqId(p)).label) + ' → ' + lower(o.delta.fqLabel) + ' · an estimate'
+    : 'about ' + lower(m.fq.label) + ' × ~' + m.years + ' more years · an estimate';
+  if (m.unitLabel) fn += ' · ' + m.unitLabel;
+  const fnY = o.fmt === 'story' ? 1712 : 1230;
+  x.fillText(fn, W / 2, fnY);
+
+  // tag line
+  if (o.tag) {
+    x.fillStyle = th.sub; x.font = '500 36px ' + sans;
+    x.fillText('What’s your number?', W / 2, o.fmt === 'story' ? 1775 : 1282);
+  }
+  // brand — wordmark only until a real domain exists
+  x.fillStyle = th.brand; x.font = '400 28px ' + sans;
+  x.fillText('Last Visits', W / 2, o.fmt === 'story' ? 1848 : 1330);
+
+  if (th.grain) {
+    const g = document.createElement('canvas'); g.width = 270; g.height = Math.ceil(H / 4);
+    const gc = g.getContext('2d'), im = gc.createImageData(g.width, g.height);
+    for (let i = 0; i < im.data.length; i += 4) {
+      const v = Math.random() * 255 | 0;
+      im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 11;
+    }
+    gc.putImageData(im, 0, 0);
+    x.imageSmoothingEnabled = false;
+    x.drawImage(g, 0, 0, W, H);
+    x.imageSmoothingEnabled = true;
+  }
+  return cv;
+}
+function shareModel() { return SHARE.delta ? SHARE.delta.model : personModel(SHARE.person); }
+function refreshCardPreview() {
+  const cv = renderCardCanvas({ person: SHARE.person, model: shareModel(), delta: SHARE.delta, fmt: SHARE.fmt, theme: SHARE.theme, tag: SHARE.tag });
+  $('cardPreview').src = cv.toDataURL('image/png');
+  document.querySelectorAll('#sheet-share .seg').forEach(s => s.classList.toggle('sel', s.dataset.fmt === SHARE.fmt));
+  renderThemeRow();
+}
+function renderThemeRow() {
+  const row = $('themeRow'); row.innerHTML = '';
+  CARD_THEMES.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'theme' + (SHARE.theme === t.id ? ' sel' : '');
+    b.style.background = t.ground;
+    b.setAttribute('aria-label', t.name + ' theme');
+    b.innerHTML = '<svg width="48" height="48" viewBox="0 0 48 48"><circle cx="16" cy="20" r="4" fill="' + t.had + '"/><circle cx="28" cy="20" r="4" fill="' + t.left + '"/><circle cx="22" cy="31" r="4" fill="' + t.bright + '"/></svg>' +
+      (!t.free && !Premium.isActive() ? '<span class="lk">●</span>' : '');
+    b.onclick = () => {
+      if (!t.free && !Premium.isActive()) { openPaywall('theme'); return; }
+      SHARE.theme = t.id; refreshCardPreview();
+    };
+    row.appendChild(b);
+  });
+}
+function openShare(p, delta) {
+  SHARE.person = p; SHARE.delta = delta; SHARE.tag = false;
+  $('tagToggle').classList.remove('on'); $('tagRow').setAttribute('aria-checked', 'false');
+  if (!CARD_THEMES.find(t => t.id === SHARE.theme && (t.free || Premium.isActive()))) SHARE.theme = 'ember';
+  refreshCardPreview();
+  openSheet('sheet-share');
+}
+document.querySelectorAll('#sheet-share .seg').forEach(s => s.onclick = () => { SHARE.fmt = s.dataset.fmt; refreshCardPreview(); });
+$('tagRow').onclick = () => {
+  SHARE.tag = !SHARE.tag;
+  $('tagToggle').classList.toggle('on', SHARE.tag);
+  $('tagRow').setAttribute('aria-checked', String(SHARE.tag));
+  refreshCardPreview();
+};
+async function doShare(saveOnly) {
+  const p = SHARE.person, m = shareModel();
+  const cv = renderCardCanvas({ person: p, model: m, delta: SHARE.delta, fmt: SHARE.fmt, theme: SHARE.theme, tag: SHARE.tag });
+  const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+  const name = personName(p);
+  const done = () => {
+    state.flags.shared = true; save();
+    const viewAtShare = currentView;
+    setTimeout(() => {
+      if (openSheets.includes('sheet-share') && currentView === viewAtShare) toast('Someone you’d send this to?');
+    }, 600);
+  };
+  if (!saveOnly && navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'x.png', { type: 'image/png' })] })) {
+    const file = new File([blob], 'last-visits.png', { type: 'image/png' });
+    const text = SHARE.delta
+      ? 'I just added ' + SHARE.delta.d + ' visits with ' + cardName(p) + '. — Last Visits'
+      : 'I have about ' + m.left + ' more visits with ' + cardName(p) + '. The number can go up. — Last Visits';
+    try { await navigator.share({ files: [file], text }); } catch (e) { /* user canceled — fine */ }
+    done(); maybeInstallBanner('share');
+    return;
+  }
+  // anchor-blob downloads silently no-op in iOS standalone / WKWebView — share the file instead
+  const file = new File([blob], 'last-visits.png', { type: 'image/png' });
+  if (STANDALONE && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); toast('Saved. Maybe call ' + name + ' too.'); } catch (e) { /* canceled — fine */ }
+    done(); maybeInstallBanner('share');
+    return;
+  }
+  const a = $('dl');
+  a.href = URL.createObjectURL(blob); a.download = 'last-visits.png'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('Saved. Maybe call ' + name + ' too.');
+  done(); maybeInstallBanner('share');
+}
+$('shareBtn').onclick = () => doShare(false);
+$('saveImgBtn').onclick = () => doShare(true);
+
+/* =====================================================================
+   Sheet C — PAYWALL ("More Time")
+   ===================================================================== */
+const PLANS = [
+  { id: 'weekly',   t: '$4.99 / week',  s: '3 days free, then $4.99 a week', badge: '' },
+  { id: 'annual',   t: '$29.99 / year', s: 'about 58¢ a week',          badge: 'Best value' },
+  { id: 'lifetime', t: '$39.99 once',   s: 'pay once, yours for good',       badge: '' }
+];
+let selPlan = 'weekly', motifTimer = null;
+function payCtaText() {
+  if (!PAYMENTS.enabled) return 'Free during early access';
+  return selPlan === 'weekly' ? 'Start 3 free days'
+    : selPlan === 'annual' ? 'Continue — $29.99/year' : 'Continue — $39.99 once';
+}
+function renderPaywall() {
+  const rows = $('planRows'); rows.innerHTML = '';
+  PLANS.forEach(pl => {
+    const b = document.createElement('button');
+    b.className = 'plan' + (selPlan === pl.id ? ' sel' : '');
+    b.innerHTML = '<span><span class="pt">' + pl.t + '</span><div class="ps">' + pl.s + '</div></span>' +
+      (pl.badge ? '<span class="badge">' + pl.badge + '</span>' : '');
+    b.onclick = () => { selPlan = pl.id; renderPaywall(); };
+    rows.appendChild(b);
+  });
+  $('payCta').textContent = payCtaText();
+  $('payCta').disabled = PAYMENTS.enabled && !PAYMENTS.links[selPlan];
+  $('payFine').textContent = PAYMENTS.enabled
+    ? 'Cancel anytime. Your number and your card stay free forever.'
+    : 'Payments aren’t live yet — More Time is free while we’re getting started. Your number and your card stay free forever.';
+}
+function openPaywall(source) {
+  // any paywall impression, from any source, consumes the once-ever auto-present slot
+  if (!state.flags.paywallAuto) { state.flags.paywallAuto = true; save(); }
+  renderPaywall();
+  // motif: 12 dots, 3 re-ignite in a loop
+  const mo = $('payMotif'); mo.innerHTML = '';
+  for (let i = 0; i < 12; i++) {
+    const d = document.createElement('i');
+    if (i < 7) d.style.background = '#6E4E1E';
+    else if (i < 9) d.style.background = '#FFF8EC';
+    mo.appendChild(d);
+  }
+  // honest teaser: only shown when a real positive delta exists for this user's own numbers
+  const p = state.people[0];
+  let hint = '';
+  if (p && p.parentAge < 100) {
+    const curIdx = freqIdx(effFreqId(p));
+    const upIdx = Math.min(FREQS.length - 1, curIdx + 2);
+    if (upIdx > curIdx) {
+      const d = personModel(p, FREQS[upIdx].id).left - personModel(p).left;
+      if (d > 0) hint = '+' + d + ' visits at a better pace';
+    }
+  }
+  $('payDeltaHint').textContent = hint;
+  $('payDeltaWrap').hidden = !hint;
+  clearInterval(motifTimer);
+  if (!RM) {
+    let k = 0;
+    motifTimer = setInterval(() => {
+      const dots = mo.children;
+      for (let i = 9; i < 12; i++) dots[i].style.background = (i - 9) < (k % 4) ? '#E8A33D' : 'var(--dot-rest)';
+      k++;
+    }, 600);
+  } else { for (let i = 9; i < 12; i++) mo.children[i].style.background = '#E8A33D'; }
+  openSheet('sheet-paywall');
+}
+$('payCta').onclick = async () => {
+  const r = await unlockPremium(selPlan);
+  if (r && r.ok) {
+    closeSheet('sheet-paywall');
+    toast('You’re in. Go make the number bigger.');
+  }
+};
+$('payDismiss').onclick = () => closeSheet('sheet-paywall');
+$('restoreBtn').onclick = () => {
+  if (Premium.isActive()) toast('More Time is active on this phone.');
+  else toast(PAYMENTS.enabled ? 'No purchase found for this device.' : 'Nothing to restore yet — More Time is free during early access.');
+};
+document.querySelectorAll('[data-legal]').forEach(b => b.onclick = () => {
+  const k = b.dataset.legal;
+  $('legalTitle').textContent = k === 'terms' ? 'Terms' : 'Privacy';
+  $('legalBody').textContent = k === 'terms'
+    ? 'Last Visits is for reflection, not advice. Every number is an estimate built from public averages and your own inputs, and is rounded in your person’s favor. When payments go live, subscriptions renew until canceled and can be canceled anytime in your store settings. Until then, More Time is free.'
+    : 'Everything you enter stays in your browser’s storage on this device. No account, no analytics, no tracking, no server. Sharing a card sends only the image you see. You can erase everything in Settings at any time.';
+  openSheet('sheet-legal');
+});
+document.addEventListener('premiumchange', () => {
+  if (currentView === 'view-home') renderHome();
+  if (currentView === 'view-planner' && PL.person) renderPlannerUI();
+  if (openSheets.includes('sheet-share')) refreshCardPreview();
+  renderSettings();
+});
+function requirePremium(source) {
+  if (Premium.isActive()) return true;
+  openPaywall(source); return false;
+}
+
+/* =====================================================================
+   S3 — HOME
+   ===================================================================== */
+function greeting() {
+  const day = new Date().getDay();
+  if (day === 0) return 'Sunday — a good day to call';
+  if (day === 6) return 'A quiet Saturday — maybe a call';
+  return 'Last Visits';
+}
+function callStreak(p) {
+  // week keys computed entirely in local time — 'YYYY-MM-DD' of the week's Monday
+  const ymd = t => t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+  const wkOf = t => { const c = new Date(t); c.setDate(c.getDate() - ((c.getDay() + 6) % 7)); return ymd(c); };
+  const wk = s => wkOf(new Date(s + 'T12:00:00')); // noon parse avoids UTC-midnight day shifts
+  const set = new Set((p.logs || []).filter(l => l.t === 'c').map(l => wk(l.d)));
+  let cur = new Date(todayStr() + 'T12:00:00'), n = 0;
+  if (!set.has(wkOf(cur))) cur.setDate(cur.getDate() - 7);
+  while (set.has(wkOf(cur))) { n++; cur.setDate(cur.getDate() - 7); }
+  return n;
+}
+function drawThumb(cv, p) {
+  const m = personModel(p);
+  const w = cv.clientWidth || 300;
+  const total = m.soFarDots + m.leftDots;
+  // logged visits visibly re-light dots at the amber/white boundary
+  const kept = (p.logs || []).filter(l => l.t === 'v').length;
+  const per = m.unit === 'month' ? 4 : m.unit; // month walls: ~4 visits light a month-dot
+  const keptLit = kept > 0 ? Math.min(m.leftDots, Math.ceil(kept / per)) : 0;
+  const geo = fitGrid(total, w - 8, 66, 6, 4, 14);
+  const dpr = Math.min(2, devicePixelRatio || 1);
+  cv.width = w * dpr; cv.height = (geo.h + 8) * dpr;
+  cv.style.height = (geo.h + 8) + 'px';
+  const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawWall(x, geo, total, (w - geo.w) / 2, 4, i => {
+    if (i < m.soFarDots) return { c: '#6E4E1E' };
+    if (i < m.soFarDots + keptLit) return { c: '#E8A33D', glow: Math.min(2, geo.dot * .3) };
+    return { c: '#FFF8EC', glow: Math.min(2, geo.dot * .3), a: 1 };
+  });
+}
+function fmtDate(s) {
+  const d = new Date(s + 'T12:00:00');
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: d.getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
+}
+function renderHome() {
+  $('greeting').textContent = greeting();
+  const prem = Premium.isActive();
+  const list = $('peopleList'); list.innerHTML = '';
+  state.people.forEach(p => {
+    const card = document.createElement('div'); card.className = 'pcard';
+    const name = personName(p);
+    const outrun = p.parentAge >= 100;
+    const canLog = prem || p.freeWall || p.parentAge >= 100;
+    const m = outrun ? null : personModel(p);
+    const streak = callStreak(p);
+    const logs = (p.logs || []).slice().sort((a, b) => b.d.localeCompare(a.d));
+
+    let html = '<div class="top"><span class="pname">' + esc(name) + '</span></div>';
+    if (!outrun) {
+      html += '<button class="thumbwrap" data-act="replay" style="width:100%;background:none;border:0;padding:0"><canvas></canvas></button>';
+      html += '<div class="numline"><span class="pnum num">' + m.left + '</span><span class="about">about · more visits</span></div>';
+      html += '<div class="paceline">' + (m.tier === 'floor'
+        ? 'Whatever the math says, the move is the same: plan the next visit.'
+        : 'at ' + lower(m.fq.label) + ' — it isn’t fixed') + '</div>';
+      // only show a pending plan — once a logged visit confirms it, the headline number already counts it
+      if (p.plan && p.plan.freqId && p.plan.freqId !== p.freqId && p.plan.freqId !== effFreqId(p)) {
+        const planned = personModel(p, p.plan.freqId);
+        const d = planned.left - m.left;
+        html += '<div class="planline">your plan: ' + lower(freqOf(p.plan.freqId).label) + (d > 0 ? ' · +' + d + ' visits' : '') + '</div>';
+      }
+    } else {
+      html += '<div class="numline"><span class="pnum num">' + (p.logs || []).length + '</span><span class="about">visits and calls, logged and kept</span></div>';
+      html += '<div class="paceline">' + esc(name) + ' has outrun the math. Count what matters.</div>';
+    }
+    if (streak > 0) html += '<div class="streak"><span class="dot"></span>' + streak + (streak === 1 ? ' week' : ' weeks') + ' running</div>';
+    html += '<div class="logrow">' +
+      '<button class="btn btn-ghost" data-act="visit">Log a visit' + (canLog ? '' : '<span class="lock">More Time</span>') + '</button>' +
+      '<button class="btn btn-ghost" data-act="call">Log a call' + (canLog ? '' : '<span class="lock">More Time</span>') + '</button></div>';
+    if (!outrun) html += '<button class="raiserow" data-act="raise"><span>Raise the number</span><span>›</span></button>';
+    if (logs.length && canLog) {
+      html += '<div class="histwrap">';
+      logs.slice(0, 6).forEach((l, i) => {
+        html += '<div class="histrow"><span>' + (l.t === 'v' ? 'Visit' : 'Call') + ' · ' + fmtDate(l.d) +
+          (l.note ? ' · ' + esc(l.note) : '') + '</span><button class="del" data-del="' + esc(l.at) + '" aria-label="Delete">&times;</button></div>';
+      });
+      html += '</div>';
+    }
+    card.innerHTML = html;
+    if (!outrun) drawThumbSoon(card.querySelector('canvas'), p);
+    card.addEventListener('click', e => {
+      const act = e.target.closest('[data-act]');
+      const del = e.target.closest('[data-del]');
+      if (del) {
+        p.logs = p.logs.filter(l => String(l.at) !== del.dataset.del);
+        save(); renderHome(); return;
+      }
+      if (!act) return;
+      if (act.dataset.act === 'replay') { startReveal(p, false); return; }
+      if (act.dataset.act === 'raise') { enterPlanner(p); return; }
+      if (act.dataset.act === 'visit') { if (canLog) openLog(p); else openPaywall('log'); return; }
+      if (act.dataset.act === 'call') { if (canLog) logCall(p, card); else openPaywall('log'); return; }
+    });
+    list.appendChild(card);
+  });
+  $('addPersonSub').textContent = prem ? 'Dad, grandparents, anyone.' : 'Everyone you love gets their own wall. Free covers one person.';
+}
+function drawThumbSoon(cv, p) { requestAnimationFrame(() => drawThumb(cv, p)); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function goHome() {
+  if (!state.people.length) { openInput(null); return; }
+  renderHome(); show('view-home');
+  maybeInstallBanner('home');
+}
+$('gearBtn').onclick = () => { renderSettings(); show('view-settings'); };
+$('addPersonBtn').onclick = () => {
+  if (!requirePremium('addperson')) return;
+  state.draft = null; openInput(null);
+};
+
+/* =====================================================================
+   S4 — PLANNER
+   ===================================================================== */
+const PL = { person: null, baseIdx: 0, simIdx: 0, unit: 1, geo: null, raf: 0, interacted: false };
+function enterPlanner(p) {
+  if (p.parentAge >= 100) { goHome(); return; }
+  if (!Premium.isActive() && state.flags.tasteUsed) { openPaywall('planner'); return; }
+  PL.person = p; PL.interacted = false;
+  PL.baseIdx = freqIdx(effFreqId(p));
+  PL.simIdx = PL.baseIdx;
+  // pick a stable dot-unit across the whole slider range
+  const maxModel = personModel(p, FREQS[FREQS.length - 1].id);
+  const maxTotal = maxModel.soFar + maxModel.left;
+  PL.unit = maxTotal > 2200 ? 25 : maxTotal > 440 ? 5 : 1;
+  $('paceSlider').value = PL.simIdx;
+  const pct = (PL.baseIdx / (FREQS.length - 1)) * 100;
+  $('nowTick').style.left = 'calc(32px + (100% - 64px) * ' + (pct / 100) + ')';
+  renderPlannerUI();
+  show('view-planner');
+}
+function plannerCounts(idx) {
+  const p = PL.person;
+  const m = personModel(p, FREQS[idx].id);
+  return { soFarDots: Math.ceil(m.soFar / PL.unit), leftDots: Math.ceil(m.left / PL.unit), left: m.left };
+}
+function renderPlannerUI() {
+  const p = PL.person;
+  const base = plannerCounts(PL.baseIdx);
+  const sim = plannerCounts(PL.simIdx);
+  const d = sim.left - base.left;
+  const name = personName(p);
+  const fLabel = lower(FREQS[PL.simIdx].label);
+
+  $('plannerSentence').innerHTML = 'At <b>' + esc(fLabel) + '</b>, about <b class="num">' + sim.left + '</b> more visits with ' + esc(name) + '.';
+  $('paceLabel').textContent = FREQS[PL.simIdx].label;
+  const chip = $('deltaChip');
+  chip.className = 'deltachip num' + (d > 0 ? ' up' : d < 0 ? ' down' : '');
+  chip.textContent = d > 0 ? '+' + d + ' visits' : d < 0 ? '−' + Math.abs(d) + ' visits' : '';
+  $('plannerNote').textContent = d < 0 ? 'It works in both directions. No judgment.'
+    : d > 0 ? d + (PL.unit > 1 ? ' visits’ worth of dots re-light.' : (d === 1 ? ' dot re-lights.' : ' dots re-light.')) : 'This is your current pace.';
+
+  const prem = Premium.isActive();
+  $('keepPlanBtn').hidden = d === 0;
+  $('shareDeltaBtn').hidden = d <= 0;
+  $('keepPlanBtn').innerHTML = 'Keep this pace' + (prem ? '' : '<span class="lock" style="color:var(--on-amber);opacity:.7">More Time</span>');
+  $('shareDeltaBtn').innerHTML = 'Share the change' + (prem ? '' : '<span class="lock">More Time</span>');
+
+  drawPlanner(base, sim, d);
+}
+function drawPlanner(base, sim, d) {
+  cancelAnimationFrame(PL.raf);
+  const cw = Math.min(innerWidth, 500) - 48;
+  const maxH = Math.floor(innerHeight * .34);
+  const total = base.soFarDots + Math.max(base.leftDots, sim.leftDots);
+  PL.geo = fitGrid(total, cw, maxH, 10, 7, 34);
+  const cv = $('plannerCanvas'), dpr = Math.min(2.5, devicePixelRatio || 1);
+  cv.width = Math.ceil(PL.geo.w * dpr); cv.height = Math.ceil(PL.geo.h * dpr);
+  cv.style.width = PL.geo.w + 'px'; cv.style.height = PL.geo.h + 'px';
+  const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const extra = Math.max(0, sim.leftDots - base.leftDots);
+  const missing = Math.max(0, base.leftDots - sim.leftDots);
+  const paint = litExtra => {
+    x.clearRect(0, 0, PL.geo.w, PL.geo.h);
+    const wg = Math.min(3, PL.geo.dot * .35), ag = Math.min(5, PL.geo.dot * .5);
+    drawWall(x, PL.geo, total, 0, 0, i => {
+      if (i < base.soFarDots) return { c: '#6E4E1E' };
+      const li = i - base.soFarDots;
+      if (li < base.leftDots - missing) return { c: '#FFF8EC', glow: wg, a: 1 };
+      if (li < base.leftDots) return { c: '#4A453C', ring: true };      // dots that would dim away
+      if (li < base.leftDots + litExtra) return { c: '#E8A33D', glow: ag }; // re-ignited
+      return { c: '#3A3833', ring: true };                                // potential, not yet lit
+    });
+  };
+  if (RM || extra === 0) { PL.litAnim = extra; paint(extra); return; }
+  // animate re-ignition one by one from current litAnim
+  let lit = 0;
+  const step = Math.max(1, Math.ceil(extra / 40));
+  const tick = () => {
+    lit = Math.min(extra, lit + step);
+    paint(lit);
+    if (lit % 4 === 0) buzz(3);
+    if (lit < extra) PL.raf = requestAnimationFrame(tick);
+  };
+  PL.raf = requestAnimationFrame(tick);
+}
+$('paceSlider').addEventListener('input', e => {
+  PL.simIdx = +e.target.value;
+  renderPlannerUI();
+});
+$('paceSlider').addEventListener('change', () => {
+  if (PL.simIdx !== PL.baseIdx) {
+    if (!Premium.isActive()) {
+      if (!PL.interacted) { PL.interacted = true; state.flags.tasteUsed = true; save(); }
+      else openPaywall('planner');
+    }
+  }
+});
+$('paceSlider').addEventListener('pointerdown', e => {
+  if (!Premium.isActive() && state.flags.tasteUsed && PL.interacted) {
+    e.preventDefault();
+    $('paceSlider').value = PL.simIdx;
+    openPaywall('planner');
+  }
+}, true);
+$('plannerBack').onclick = goHome;
+$('keepPlanBtn').onclick = () => {
+  if (!requirePremium('plan')) return;
+  const p = PL.person;
+  p.plan = { freqId: FREQS[PL.simIdx].id, setAt: Date.now() };
+  save();
+  toast('Pace saved. It starts counting the moment you log your next visit.');
+  goHome();
+};
+$('shareDeltaBtn').onclick = () => {
+  if (!requirePremium('deltacard')) return;
+  const p = PL.person;
+  const baseM = personModel(p, FREQS[PL.baseIdx].id);
+  const simM = personModel(p, FREQS[PL.simIdx].id);
+  const d = simM.left - baseM.left;
+  // consistent dot-unit across before/after so the delta grid is honest and readable
+  const totalMax = baseM.soFar + Math.max(baseM.left, simM.left);
+  const u = totalMax > 2200 ? 25 : totalMax > 440 ? 5 : 1;
+  const model = Object.assign({}, baseM, {
+    unit: u,
+    soFarDots: Math.ceil(baseM.soFar / u),
+    leftDots: Math.ceil(baseM.left / u),
+    unitLabel: u > 1 ? 'each dot is ' + u + ' visits' : ''
+  });
+  openShare(p, { d, model, simLeftDots: Math.ceil(simM.left / u), fqLabel: FREQS[PL.simIdx].label });
+};
+
+/* =====================================================================
+   S5 — LOGGING
+   ===================================================================== */
+let logPerson = null;
+function todayStr() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function openLog(p) {
+  logPerson = p;
+  $('logDate').value = todayStr(); $('logDate').max = todayStr();
+  $('logDate').style.display = 'none';
+  $('logToday').classList.add('sel'); $('logPick').classList.remove('sel');
+  $('logNote').value = '';
+  openSheet('sheet-log');
+}
+$('logToday').onclick = () => { $('logToday').classList.add('sel'); $('logPick').classList.remove('sel'); $('logDate').style.display = 'none'; $('logDate').value = todayStr(); };
+$('logPick').onclick = () => { $('logPick').classList.add('sel'); $('logToday').classList.remove('sel'); $('logDate').style.display = 'block'; };
+$('logSave').onclick = () => {
+  if (!logPerson) return;
+  const d = $('logDate').value || todayStr();
+  logPerson.logs = logPerson.logs || [];
+  logPerson.logs.push({ t: 'v', d, note: $('logNote').value.trim(), at: Date.now() });
+  save();
+  closeSheet('sheet-log');
+  renderHome();
+  toast('Logged. That one’s kept.');
+  buzz(12);
+  const card = [...document.querySelectorAll('.pcard')][state.people.indexOf(logPerson)];
+  if (card) { card.classList.remove('glow'); void card.offsetWidth; card.classList.add('glow'); }
+};
+function logCall(p, cardEl) {
+  p.logs = p.logs || [];
+  const last = p.logs[p.logs.length - 1];
+  if (last && last.t === 'c' && last.d === todayStr() && Date.now() - last.at < 1500) return;
+  const first = !p.logs.some(l => l.t === 'c');
+  p.logs.push({ t: 'c', d: todayStr(), note: '', at: Date.now() });
+  save(); renderHome();
+  const w = callStreak(p);
+  toast(first ? 'Streak started. Same time next week?' : 'Logged. ' + w + (w === 1 ? ' week' : ' weeks') + ' running.');
+  buzz(8);
+}
+
+/* =====================================================================
+   S7 — SETTINGS
+   ===================================================================== */
+function renderSettings() {
+  const el = $('settingsList'); el.innerHTML = '';
+  const row = (label, val, fn, cls) => {
+    const b = document.createElement('button');
+    b.className = 'setrow' + (cls ? ' ' + cls : '');
+    b.innerHTML = '<span>' + label + '</span>' + (val ? '<span class="v">' + val + '</span>' : '<span class="v">›</span>');
+    if (fn) b.onclick = fn;
+    el.appendChild(b);
+  };
+  state.people.forEach(p => row('Edit ' + esc(personName(p)), null, () => openInput(p)));
+  row('More Time', Premium.isActive() ? 'active' : 'get it', () => { if (!Premium.isActive()) openPaywall('settings'); else toast('More Time is active on this phone.'); });
+  row('Restore purchase', null, () => $('restoreBtn').onclick());
+  row('How the math works', null, () => { if (state.people[0]) openWhy(state.people[0]); });
+  row('Add to Home Screen', null, () => promptInstall());
+  row('Terms', null, () => document.querySelector('[data-legal="terms"]').onclick());
+  row('Privacy', null, () => document.querySelector('[data-legal="privacy"]').onclick());
+  row('Erase everything', null, eraseAll, 'danger');
+}
+let eraseArmed = false;
+function eraseAll() {
+  if (!eraseArmed) {
+    eraseArmed = true;
+    toast('This erases your people, logs, and streaks from this phone. There’s no cloud copy. Tap again to erase.', 4200);
+    setTimeout(() => { eraseArmed = false; }, 4500);
+    return;
+  }
+  localStorage.removeItem('lv_state'); localStorage.removeItem(Premium.KEY);
+  location.reload();
+}
+$('settingsBack').onclick = goHome;
+
+/* =====================================================================
+   INSTALL
+   ===================================================================== */
+let bip = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); bip = e; });
+function installEligible() {
+  if (STANDALONE) return false;
+  const f = state.flags;
+  if (f.installDismissCount >= 2) return false;
+  if (f.installDismissCount === 1 && Date.now() - f.installDismissAt < 7 * 864e5) return false;
+  return true;
+}
+function maybeInstallBanner(trigger) {
+  if (!installEligible() || openSheets.length || currentView === 'view-reveal') return;
+  if (trigger === 'share' || (trigger === 'home' && state.flags.sessions >= 2)) {
+    setTimeout(() => {
+      // only ever surface on home — never over the planner, reveal, or a sheet
+      if (!openSheets.length && currentView === 'view-home') $('installBanner').classList.add('on');
+    }, trigger === 'share' ? 900 : 1400);
+  }
+}
+function promptInstall() {
+  $('installBanner').classList.remove('on');
+  if (bip) { bip.prompt(); bip = null; return; }
+  openSheet('sheet-ios');
+}
+$('installAdd').onclick = promptInstall;
+$('installLater').onclick = () => {
+  $('installBanner').classList.remove('on');
+  state.flags.installDismissCount++; state.flags.installDismissAt = Date.now(); save();
+};
+function onSheetClosed(id) {
+  if (id === 'sheet-paywall') { clearInterval(motifTimer); motifTimer = null; }
+  if (id === 'sheet-share' && state.flags.shared) maybeInstallBanner('share');
+}
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+state.flags.sessions = (state.flags.sessions || 0) + 1; save();
+/* checkout return: payment links must redirect back with ?premium=<plan> */
+try {
+  const back = new URLSearchParams(location.search).get('premium');
+  if (back && PAYMENTS.enabled && ['weekly', 'annual', 'lifetime'].includes(back) && !Premium.isActive()) {
+    Premium.grant(back, 'checkout');
+    history.replaceState(null, '', location.pathname);
+    toast('You’re in. Go make the number bigger.');
+  }
+} catch (e) {}
+if (state.people.length) goHome();
+else openInput(null);
+</script>
+</body>
+</html>
