@@ -37,6 +37,16 @@ story baked in.
 | Build | Polished v1 client-side in days? | Needs backend/ML/moderation/accounts for v1 |
 | Fresh | New angle vs. existing viral apps? | Tired format with no twist |
 
+## Design doctrine (non-negotiable since cycle 001)
+
+These are **iOS apps**. Every screen uses Apple's **Liquid Glass** design language:
+translucent layered materials with backdrop blur and saturation, specular edge
+highlights, floating glass controls over scrolling content, glass sheets for
+paywall and share moments, large continuous-corner radii, system typography.
+Flat opaque cards and desktop idioms are rejected in critique. The shareable
+result card must read as a native iOS artifact — the reel audience should think
+"what app is that?" from the material alone.
+
 ## Idea sources (research squad sweeps these every cycle)
 
 - App Store top charts: Top Free, rising utilities/lifestyle/health — what's breaking

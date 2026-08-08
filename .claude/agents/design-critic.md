@@ -10,7 +10,10 @@ headless screenshots), and report findings ONLY — you never edit.
 
 Judge against the bar in PLAYBOOK.md and .claude/agents/app-builder.md:
 - visual-design lens: typography scale, spacing rhythm, palette, the shareable card's
-  screenshot-worthiness, dark/light handling, loading/empty states.
+  screenshot-worthiness, dark/light handling, loading/empty states — and Liquid
+  Glass fidelity: translucent layered materials with backdrop blur, specular edge
+  highlights, floating glass controls, continuous corners. Flat opaque cards or
+  non-iOS idioms (hover states, desktop modals) are automatic should-fix findings.
 - copy lens: every string — hook strength, emotional precision, no AI-slop phrasing,
   paywall copy that sells without sleaze.
 - bugs lens: broken flows, JS errors, edge cases (empty input, absurd input, repeat

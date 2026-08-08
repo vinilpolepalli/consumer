@@ -23,6 +23,7 @@
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none !important}
 html,body{height:100%}
 body{background:var(--paper);color:var(--ink);font-family:var(--font-t);font-size:17px;line-height:1.47;
   overscroll-behavior-y:none;overflow-x:hidden}
@@ -89,7 +90,7 @@ h2{font-family:var(--font-d);font-size:22px;line-height:28px;font-weight:600}
 .chrome.show{opacity:1;pointer-events:auto}
 #revealCenter{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;margin-top:14px;padding:0 24px}
 #whyLink{margin-bottom:4px}
-.bignum{font-family:var(--font-d);font-size:112px;line-height:1;font-weight:600;letter-spacing:-.02em;
+.bignum{font-family:var(--font-d);font-size:clamp(72px,13vh,112px);line-height:1;font-weight:600;letter-spacing:-.02em;
   font-variant-numeric:tabular-nums;color:var(--ink)}
 #revealLabel{font-size:20px;color:var(--ink-2);margin-top:6px}
 #revealSub{max-width:320px;margin-top:10px}
@@ -184,7 +185,8 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radiu
 .theme{width:52px;height:52px;border-radius:14px;border:2px solid var(--line);position:relative;overflow:hidden}
 .theme.sel{border-color:var(--amber)}
 .theme .lk{position:absolute;right:3px;bottom:3px;font-size:10px;color:var(--ink-2)}
-.tagrow{display:flex;align-items:center;justify-content:space-between;padding:8px 24px;min-height:44px}
+.tagrow{display:flex;align-items:center;justify-content:space-between;padding:8px 24px;min-height:44px;width:100%;text-align:left}
+.tagrow:active .switch:not(.on){background:var(--ink-3)}
 .tagrow .lab2{font-size:14px;color:var(--ink-2)}
 .switch{width:50px;height:30px;border-radius:15px;background:var(--line);position:relative;transition:background .2s}
 .switch.on{background:var(--amber)}
@@ -235,6 +237,29 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radiu
 .iosstep{display:flex;gap:14px;align-items:center;color:var(--ink-2);font-size:15px}
 .iosstep svg{flex:0 0 34px}
 
+/* short viewports: keep the paywall's price, restore and dismiss above the fold */
+@media (max-height: 760px){
+  .motif{padding:8px 0 0}
+  .paylist{gap:9px;padding-top:10px}
+  .payfeat .tx{font-size:14px}
+  .payfeat .ic{width:30px;height:30px;flex:0 0 30px}
+  .plans{gap:8px}
+  .plan{padding:10px 14px}
+  .finep{padding-top:6px}
+}
+@media (max-height: 700px){
+  #sheet-paywall .sheethead{position:absolute;top:6px;right:6px;padding:0;z-index:2}
+  .motif{display:none}
+  .paytitle{font-size:20px}
+  .paysub{font-size:14px}
+  .paylist{gap:6px}
+  .payfeat .tx{font-size:13px}
+  .plans{gap:6px;padding-top:8px}
+  .plan{padding:8px 14px}
+  .plan .pt{font-size:15px}
+  .plan .ps{font-size:12px}
+}
+
 @media (prefers-reduced-motion: reduce){
   *{transition:none !important;animation:none !important}
 }
@@ -244,6 +269,9 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radiu
 
 <!-- ============ S1 INPUT ============ -->
 <main id="view-input" class="view">
+  <div id="inputBackRow" style="margin:-6px 0 4px -10px" hidden>
+    <button class="iconbtn" id="inputBack" aria-label="Back without saving">&#8249;</button>
+  </div>
   <div class="microlabel">Last Visits</div>
   <h1 style="margin-top:10px">Who do you want more time with?</h1>
 
@@ -394,10 +422,10 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radiu
   <div class="sheetscroll" style="padding-left:0;padding-right:0">
     <div id="cardPreviewWrap"><img id="cardPreview" alt="Your card"></div>
     <div class="themerow" id="themeRow"></div>
-    <div class="tagrow">
+    <button class="tagrow" id="tagRow" role="switch" aria-checked="false">
       <span class="lab2">Add &ldquo;What&rsquo;s your number?&rdquo;</span>
-      <button class="switch" id="tagToggle" role="switch" aria-checked="false" aria-label="Tag a friend line"></button>
-    </div>
+      <span class="switch" id="tagToggle" aria-hidden="true"></span>
+    </button>
     <div class="sheetbtns">
       <button class="btn" id="shareBtn">Share</button>
       <button class="quiet" id="saveImgBtn" style="align-self:center">Save image</button>
@@ -411,7 +439,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radiu
     <button class="iconbtn sheet-x" aria-label="Close">&times;</button></div>
   <div class="sheetscroll">
     <div class="motif" id="payMotif"></div>
-    <div style="text-align:center;margin-top:2px"><span class="num" id="payDeltaHint" style="color:var(--amber);font-size:15px;font-weight:600;filter:blur(2px)"></span></div>
+    <div id="payDeltaWrap" style="text-align:center;margin-top:2px" hidden><span class="num" id="payDeltaHint" style="color:var(--amber);font-size:15px;font-weight:600"></span></div>
     <h2 class="paytitle">Make the number bigger.</h2>
     <p class="paysub">The reveal is free, always. More Time is for changing what it says.</p>
     <div class="paylist">
@@ -426,14 +454,14 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radiu
     </div>
     <div class="plans" id="planRows"></div>
     <div class="sheetbtns"><button class="btn" id="payCta"></button></div>
-    <div class="finep" id="payFine"></div>
-    <div class="payfoot">
+    <div class="payfoot" style="padding-top:4px">
+      <button id="payDismiss">Not now</button>
       <button id="restoreBtn">Restore purchase</button>
+    </div>
+    <div class="finep" id="payFine"></div>
+    <div class="payfoot" style="padding-top:2px">
       <button data-legal="terms">Terms</button>
       <button data-legal="privacy">Privacy</button>
-    </div>
-    <div style="text-align:center;padding-top:2px">
-      <button class="quiet" id="payDismiss">Not now</button>
     </div>
   </div>
 </section>
@@ -525,7 +553,11 @@ async function unlockPremium(plan /* 'weekly' | 'annual' | 'lifetime' */) {
     Premium.grant(plan, 'stub');   // early access: honest free grant, no fake charge ever
     return { ok: true, source: 'stub' };
   }
-  window.location.href = PAYMENTS.links[plan];
+  const link = PAYMENTS.links[plan];
+  if (!link) { toast('That plan isn’t available yet.'); return { ok: false }; }
+  // checkout must redirect back with ?premium=<plan>; handled at boot
+  window.location.href = link;
+  return { ok: false, source: 'redirect' };
 }
 
 /* ---------------- data ---------------- */
@@ -604,24 +636,25 @@ function personModel(p, overrideFreqId) {
 }
 
 /* ---------------- grid geometry (shared by reveal, cards, thumbs, planner) ---------------- */
-function fitGrid(total, maxW, maxH, prefDot, prefGap) {
+function fitGrid(total, maxW, maxH, prefDot, prefGap, maxDot) {
   prefDot = prefDot || 10; prefGap = prefGap || 7;
-  const gr = prefGap / (prefDot + prefGap); // gap share of a cell
-  let unit = prefDot + prefGap;
-  let cols = Math.max(6, Math.min(20, Math.floor((maxW + prefGap) / unit)));
-  let rows = Math.ceil(total / cols);
-  if (rows * unit - prefGap > maxH) {
-    // grow columns / shrink dots until it fits inside maxW × maxH
-    let best = null;
-    for (let c = cols; c <= 60; c++) {
-      const r = Math.ceil(total / c);
-      const u = Math.min(maxW / (c - gr), maxH / (r - gr));
-      if (!best || u > best.u) best = { c, r, u };
-      if (u >= unit) break;
-    }
-    cols = best.c; rows = best.r; unit = Math.min(unit, best.u);
+  total = Math.max(1, Math.round(total));
+  maxDot = maxDot || prefDot * 2.5;                 // dots may grow to fill the box, up to this cap
+  const gr = prefGap / (prefDot + prefGap);         // gap share of a cell
+  const maxUnit = maxDot / (1 - gr);
+  // choose the column count that yields the biggest dots inside maxW × maxH,
+  // tie-breaking toward a squarish wall; cols never exceed the dot count
+  const target = Math.sqrt(total * maxW / Math.max(40, maxH));
+  let best = null;
+  const cMax = Math.min(total, 120);
+  for (let c = 1; c <= cMax; c++) {
+    const r = Math.ceil(total / c);
+    const u = Math.min(maxUnit, maxW / (c - gr), maxH / (r - gr));
+    const score = u - Math.abs(c - target) * 0.02;
+    if (!best || score > best.score) best = { c, r, u, score };
   }
-  const dot = Math.max(3, unit * prefDot / (prefDot + prefGap));
+  const cols = best.c, rows = best.r, unit = Math.max(4, best.u);
+  const dot = Math.max(3, unit * (1 - gr));
   const w = cols * unit - (unit - dot), h = rows * unit - (unit - dot);
   return { cols, rows, unit, dot, w, h };
 }
@@ -652,6 +685,10 @@ function show(id) {
   VIEWS.forEach(v => $(v).classList.toggle('active', v === id));
   $('cta-input').classList.toggle('on', id === 'view-input');
   currentView = id;
+  // never let the reveal's animation loops keep painting behind another view
+  if (id !== 'view-reveal') { cancelAnimationFrame(RV.raf); cancelAnimationFrame(RV.pulseRaf); }
+  // the install banner lives on home only — never over reveal, planner or input
+  if (id !== 'view-home') $('installBanner').classList.remove('on');
   window.scrollTo(0, 0);
 }
 
@@ -672,13 +709,27 @@ function openSheet(id) {
   const f = s.querySelector('.btn, button'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 350);
 }
 function closeSheet(id) {
-  const s = $(id); s.classList.remove('open');
+  const s = $(id); s.classList.remove('open'); s.style.bottom = '';
   openSheets = openSheets.filter(x => x !== id);
   if (!openSheets.length) $('backdrop').classList.remove('on');
   onSheetClosed(id);
 }
 function closeTopSheet() { if (openSheets.length) closeSheet(openSheets[openSheets.length - 1]); }
 $('backdrop').addEventListener('click', closeTopSheet);
+/* keyboard-aware sheets: lift the open sheet above the on-screen keyboard */
+if (window.visualViewport) {
+  const vv = window.visualViewport;
+  const lift = () => {
+    const kb = Math.max(0, innerHeight - vv.height - vv.offsetTop);
+    document.querySelectorAll('.sheet.open').forEach(s => { s.style.bottom = kb + 'px'; });
+  };
+  vv.addEventListener('resize', lift);
+  vv.addEventListener('scroll', lift);
+}
+document.addEventListener('focusin', e => {
+  if (e.target.closest && e.target.closest('.sheetscroll'))
+    setTimeout(() => { try { e.target.scrollIntoView({ block: 'center' }); } catch (x) {} }, 300);
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTopSheet(); });
 document.querySelectorAll('.sheet-x').forEach(b => b.addEventListener('click', e => {
   closeSheet(e.target.closest('.sheet').id);
@@ -783,11 +834,18 @@ $('ageMinus').onclick = () => { const d = draft(); d.parentAge = clamp((d.parent
 $('agePlus').onclick = () => { const d = draft(); d.parentAge = clamp((d.parentAge || 60) + 1, 20, 110); $('parentAge').value = d.parentAge; save(); validateInput(); };
 $('skipAge').onclick = () => { const d = draft(); d.userAge = null; d.userSkipped = true; $('userAge').value = ''; save(); validateInput(); toast('We’ll estimate it. You can fix it anytime.'); };
 
+let editReturn = null; // view to go back to when editing is discarded or unchanged
+function editExit() {
+  if (editReturn === 'view-settings') { renderSettings(); show('view-settings'); }
+  else goHome();
+}
 function openInput(person) {
   editingId = person ? person.id : null;
+  editReturn = person ? currentView : null;
   if (person) {
     state.draft = { whoId: person.whoId, name: person.name || '', parentAge: person.parentAge, userAge: person.userAge, userSkipped: person.userAge == null, freqId: person.freqId };
   }
+  $('inputBackRow').hidden = !editingId;
   const d = draft();
   $('customName').value = d.name || '';
   $('parentAge').value = d.parentAge != null ? d.parentAge : '';
@@ -795,19 +853,27 @@ function openInput(person) {
   renderWhoChips(); renderFreqChips(); syncInputLabels(); validateInput();
   show('view-input');
 }
+$('inputBack').onclick = () => {
+  state.draft = null; editingId = null; save();
+  editExit();
+};
 $('ctaSee').onclick = () => {
   if (!validateInput()) return;
   const d = draft();
-  let p;
+  let p, unchanged = false;
   if (editingId) {
     p = state.people.find(x => x.id === editingId);
+    unchanged = p.whoId === d.whoId && (p.name || '') === (d.name || '').trim() &&
+      p.parentAge === d.parentAge && p.userAge === d.userAge && p.freqId === d.freqId;
     Object.assign(p, { whoId: d.whoId, name: (d.name || '').trim(), sex: WHO.find(w => w.id === d.whoId).sex, parentAge: d.parentAge, userAge: d.userAge, freqId: d.freqId });
   } else {
     p = { id: 'p' + Date.now(), whoId: d.whoId, name: (d.name || '').trim(), sex: WHO.find(w => w.id === d.whoId).sex,
       parentAge: d.parentAge, userAge: d.userAge, freqId: d.freqId, plan: null, logs: [], freeWall: false, createdAt: Date.now() };
     state.people.push(p);
   }
+  if (p.parentAge >= 100) p.freeWall = true; // 100+ always gets free logging, promised or not
   state.draft = null; save();
+  if (unchanged) { editingId = null; editExit(); return; }
   if (p.parentAge >= 100) { openOutrun(p); return; }
   startReveal(p, !state.flags.revealDone);
 };
@@ -850,9 +916,9 @@ function startReveal(p, first) {
   const m = RV.model;
   const wrap = $('revealCanvasWrap');
   const cw = Math.min(innerWidth, 500) - 48;
-  const maxH = Math.floor(innerHeight * .42);
+  const maxH = Math.floor(innerHeight * (innerHeight < 700 ? .34 : .42)); // short phones: number + both actions stay above the fold
   const total = m.soFarDots + m.leftDots;
-  RV.geo = fitGrid(total, cw, maxH, 10, 7);
+  RV.geo = fitGrid(total, cw, maxH, 10, 7, 34);
   const cv = $('revealCanvas'), dpr = Math.min(2.5, devicePixelRatio || 1);
   cv.width = Math.ceil(RV.geo.w * dpr); cv.height = Math.ceil(RV.geo.h * dpr);
   cv.style.width = RV.geo.w + 'px'; cv.style.height = RV.geo.h + 'px';
@@ -867,7 +933,8 @@ function startReveal(p, first) {
   const tFloodEnd = tPlace + floodDur;
   const tDim = tFloodEnd + 300;                          // stillness then dim
   const tWhiteStart = tDim + 260;
-  const wInt = Math.max(16, Math.min(90, 1700 / Math.max(1, m.leftDots)));
+  // white ignition is a bounded phase (~2s), never per-dot-floored: dense walls ignite many dots per frame
+  const wInt = Math.min(90, (RV.fast ? 1200 : 2000) / Math.max(1, m.leftDots));
   const tWhiteEnd = tWhiteStart + m.leftDots * wInt;
   const C = revealColors();
   const easeIn = x => x * x;
@@ -1016,7 +1083,7 @@ $('whyClose').onclick = () => closeSheet('sheet-why');
    ===================================================================== */
 const CARD_THEMES = [
   { id: 'ember', name: 'Ember', free: true,  ground: '#0F0E0C', had: '#6E4E1E', bright: '#E8A33D', left: '#FFF8EC', ink: '#F4EFE6', sub: '#A69E90', faint: '#6E675C', brand: '#3A3833', grain: false },
-  { id: 'ivory', name: 'Ivory', free: false, ground: '#F6F1E7', had: '#DCC490', bright: '#C9821E', left: '#23201B', ink: '#23201B', sub: '#6F685D', faint: '#9B9385', brand: '#C6BDAC', grain: false },
+  { id: 'ivory', name: 'Ivory', free: false, ground: '#F6F1E7', had: '#DCC490', bright: '#8A5710', left: '#C9821E', ink: '#23201B', sub: '#6F685D', faint: '#9B9385', brand: '#B4AA97', grain: false, light: true },
   { id: 'dusk',  name: 'Dusk',  free: false, ground: '#101623', had: '#5A4038', bright: '#D98B7E', left: '#EDF2FF', ink: '#EDF2FF', sub: '#8E97AD', faint: '#5A6378', brand: '#333C52', grain: false },
   { id: 'grain', name: 'Grain', free: false, ground: '#0F0E0C', had: '#6E4E1E', bright: '#E8A33D', left: '#FFF8EC', ink: '#F4EFE6', sub: '#A69E90', faint: '#6E675C', brand: '#3A3833', grain: true }
 ];
@@ -1028,9 +1095,9 @@ function renderCardCanvas(o) {
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const x = cv.getContext('2d');
   x.fillStyle = th.ground; x.fillRect(0, 0, W, H);
-  // vignette
+  // vignette (kept subtle on light grounds — a strong lift reads as a hotspot)
   const vg = x.createRadialGradient(W / 2, H * .42, 80, W / 2, H * .42, H * .62);
-  const lift = th.id === 'ivory' ? 'rgba(255,255,255,0.5)' : 'rgba(255,244,220,0.05)';
+  const lift = th.light ? 'rgba(255,255,255,0.15)' : 'rgba(255,244,220,0.05)';
   vg.addColorStop(0, lift); vg.addColorStop(1, 'rgba(0,0,0,0)');
   x.fillStyle = vg; x.fillRect(0, 0, W, H);
 
@@ -1053,10 +1120,10 @@ function renderCardCanvas(o) {
   const gMaxH = o.fmt === 'story' ? 800 : 545;
   const extra = isDelta && o.delta.d > 0 ? o.delta.simLeftDots - m.leftDots : 0;
   const total = m.soFarDots + m.leftDots + Math.max(0, extra);
-  const geo = fitGrid(total, 888, gMaxH, 26, 18);
+  const geo = fitGrid(total, 888, gMaxH, 26, 18, 64);
   const gx = (W - geo.w) / 2;
   const gTop = gTop0 + Math.max(0, (gMaxH - geo.h) / 2);
-  const wGlow = Math.min(10, geo.dot * .45);
+  const wGlow = th.light ? 0 : Math.min(10, geo.dot * .45); // glow only works on dark grounds
   drawWall(x, geo, total, gx, gTop, i => {
     if (i < m.soFarDots) return { c: th.had };
     const li = i - m.soFarDots;
@@ -1065,7 +1132,7 @@ function renderCardCanvas(o) {
       return { c: th.left, glow: wGlow, a: 1 };
     }
     if (li < m.leftDots) return { c: th.left, glow: wGlow, a: 1 };
-    return { c: th.bright, glow: Math.min(10, geo.dot * .5) }; // re-ignited delta dots
+    return { c: th.bright, glow: th.light ? 0 : Math.min(10, geo.dot * .5) }; // re-ignited delta dots
   });
 
   // number
@@ -1087,17 +1154,17 @@ function renderCardCanvas(o) {
     ? lower(freqOf(effFreqId(p)).label) + ' → ' + lower(o.delta.fqLabel) + ' · an estimate'
     : 'about ' + lower(m.fq.label) + ' × ~' + m.years + ' more years · an estimate';
   if (m.unitLabel) fn += ' · ' + m.unitLabel;
-  const fnY = o.fmt === 'story' ? 1712 : 1237;
+  const fnY = o.fmt === 'story' ? 1712 : 1230;
   x.fillText(fn, W / 2, fnY);
 
   // tag line
   if (o.tag) {
     x.fillStyle = th.sub; x.font = '500 36px ' + sans;
-    x.fillText('What’s your number?', W / 2, o.fmt === 'story' ? 1775 : 1288);
+    x.fillText('What’s your number?', W / 2, o.fmt === 'story' ? 1775 : 1282);
   }
-  // brand
+  // brand — wordmark only until a real domain exists
   x.fillStyle = th.brand; x.font = '400 28px ' + sans;
-  x.fillText('lastvisits.app', W / 2, o.fmt === 'story' ? 1848 : 1318);
+  x.fillText('Last Visits', W / 2, o.fmt === 'story' ? 1848 : 1330);
 
   if (th.grain) {
     const g = document.createElement('canvas'); g.width = 270; g.height = Math.ceil(H / 4);
@@ -1138,16 +1205,16 @@ function renderThemeRow() {
 }
 function openShare(p, delta) {
   SHARE.person = p; SHARE.delta = delta; SHARE.tag = false;
-  $('tagToggle').classList.remove('on'); $('tagToggle').setAttribute('aria-checked', 'false');
+  $('tagToggle').classList.remove('on'); $('tagRow').setAttribute('aria-checked', 'false');
   if (!CARD_THEMES.find(t => t.id === SHARE.theme && (t.free || Premium.isActive()))) SHARE.theme = 'ember';
   refreshCardPreview();
   openSheet('sheet-share');
 }
 document.querySelectorAll('#sheet-share .seg').forEach(s => s.onclick = () => { SHARE.fmt = s.dataset.fmt; refreshCardPreview(); });
-$('tagToggle').onclick = () => {
+$('tagRow').onclick = () => {
   SHARE.tag = !SHARE.tag;
   $('tagToggle').classList.toggle('on', SHARE.tag);
-  $('tagToggle').setAttribute('aria-checked', String(SHARE.tag));
+  $('tagRow').setAttribute('aria-checked', String(SHARE.tag));
   refreshCardPreview();
 };
 async function doShare(saveOnly) {
@@ -1162,8 +1229,8 @@ async function doShare(saveOnly) {
   if (!saveOnly && navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'x.png', { type: 'image/png' })] })) {
     const file = new File([blob], 'last-visits.png', { type: 'image/png' });
     const text = SHARE.delta
-      ? 'I just added ' + SHARE.delta.d + ' visits with ' + cardName(p) + '. lastvisits.app'
-      : 'I have about ' + m.left + ' more visits with ' + cardName(p).replace(/^my /, 'my ') + '. The number can go up. lastvisits.app';
+      ? 'I just added ' + SHARE.delta.d + ' visits with ' + cardName(p) + '. — Last Visits'
+      : 'I have about ' + m.left + ' more visits with ' + cardName(p) + '. The number can go up. — Last Visits';
     try { await navigator.share({ files: [file], text }); } catch (e) { /* user canceled — fine */ }
     done(); maybeInstallBanner('share');
     return;
@@ -1181,7 +1248,7 @@ $('saveImgBtn').onclick = () => doShare(true);
    Sheet C — PAYWALL ("More Time")
    ===================================================================== */
 const PLANS = [
-  { id: 'weekly',   t: '$4.99 / week',  s: '3 days free, then $4.99 a week', badge: 'Try it' },
+  { id: 'weekly',   t: '$4.99 / week',  s: '3 days free, then $4.99 a week', badge: '' },
   { id: 'annual',   t: '$29.99 / year', s: 'about 58¢ a week',          badge: 'Best value' },
   { id: 'lifetime', t: '$39.99 once',   s: 'pay once, yours for good',       badge: '' }
 ];
@@ -1202,11 +1269,14 @@ function renderPaywall() {
     rows.appendChild(b);
   });
   $('payCta').textContent = payCtaText();
+  $('payCta').disabled = PAYMENTS.enabled && !PAYMENTS.links[selPlan];
   $('payFine').textContent = PAYMENTS.enabled
     ? 'Cancel anytime. Your number and your card stay free forever.'
     : 'Payments aren’t live yet — More Time is free while we’re getting started. Your number and your card stay free forever.';
 }
 function openPaywall(source) {
+  // any paywall impression, from any source, consumes the once-ever auto-present slot
+  if (!state.flags.paywallAuto) { state.flags.paywallAuto = true; save(); }
   renderPaywall();
   // motif: 12 dots, 3 re-ignite in a loop
   const mo = $('payMotif'); mo.innerHTML = '';
@@ -1216,14 +1286,19 @@ function openPaywall(source) {
     else if (i < 9) d.style.background = '#FFF8EC';
     mo.appendChild(d);
   }
+  // honest teaser: only shown when a real positive delta exists for this user's own numbers
   const p = state.people[0];
+  let hint = '';
   if (p && p.parentAge < 100) {
-    const cur = personModel(p);
-    const upIdx = Math.min(FREQS.length - 1, freqIdx(effFreqId(p)) + 2);
-    const up = personModel(p, FREQS[upIdx].id);
-    const d = Math.max(1, up.left - cur.left);
-    $('payDeltaHint').textContent = '+' + d + ' visits';
-  } else $('payDeltaHint').textContent = '+9 visits';
+    const curIdx = freqIdx(effFreqId(p));
+    const upIdx = Math.min(FREQS.length - 1, curIdx + 2);
+    if (upIdx > curIdx) {
+      const d = personModel(p, FREQS[upIdx].id).left - personModel(p).left;
+      if (d > 0) hint = '+' + d + ' visits at a better pace';
+    }
+  }
+  $('payDeltaHint').textContent = hint;
+  $('payDeltaWrap').hidden = !hint;
   clearInterval(motifTimer);
   if (!RM) {
     let k = 0;
@@ -1276,24 +1351,34 @@ function greeting() {
   return 'Last Visits';
 }
 function callStreak(p) {
-  const wk = d => { const t = new Date(d); const day = (t.getDay() + 6) % 7; t.setDate(t.getDate() - day); return t.toISOString().slice(0, 10); };
+  // week keys computed entirely in local time — 'YYYY-MM-DD' of the week's Monday
+  const ymd = t => t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+  const wkOf = t => { const c = new Date(t); c.setDate(c.getDate() - ((c.getDay() + 6) % 7)); return ymd(c); };
+  const wk = s => wkOf(new Date(s + 'T12:00:00')); // noon parse avoids UTC-midnight day shifts
   const set = new Set((p.logs || []).filter(l => l.t === 'c').map(l => wk(l.d)));
-  let cur = new Date(), n = 0;
-  if (!set.has(wk(cur))) cur.setDate(cur.getDate() - 7);
-  while (set.has(wk(cur))) { n++; cur.setDate(cur.getDate() - 7); }
+  let cur = new Date(todayStr() + 'T12:00:00'), n = 0;
+  if (!set.has(wkOf(cur))) cur.setDate(cur.getDate() - 7);
+  while (set.has(wkOf(cur))) { n++; cur.setDate(cur.getDate() - 7); }
   return n;
 }
 function drawThumb(cv, p) {
   const m = personModel(p);
   const w = cv.clientWidth || 300;
   const total = m.soFarDots + m.leftDots;
-  const geo = fitGrid(total, w - 8, 66, 6, 4);
+  // logged visits visibly re-light dots at the amber/white boundary
+  const kept = (p.logs || []).filter(l => l.t === 'v').length;
+  const per = m.unit === 'month' ? 4 : m.unit; // month walls: ~4 visits light a month-dot
+  const keptLit = kept > 0 ? Math.min(m.leftDots, Math.ceil(kept / per)) : 0;
+  const geo = fitGrid(total, w - 8, 66, 6, 4, 14);
   const dpr = Math.min(2, devicePixelRatio || 1);
   cv.width = w * dpr; cv.height = (geo.h + 8) * dpr;
   cv.style.height = (geo.h + 8) + 'px';
   const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0);
-  drawWall(x, geo, total, (w - geo.w) / 2, 4, i =>
-    i < m.soFarDots ? { c: '#6E4E1E' } : { c: '#FFF8EC', glow: Math.min(2, geo.dot * .3), a: 1 });
+  drawWall(x, geo, total, (w - geo.w) / 2, 4, i => {
+    if (i < m.soFarDots) return { c: '#6E4E1E' };
+    if (i < m.soFarDots + keptLit) return { c: '#E8A33D', glow: Math.min(2, geo.dot * .3) };
+    return { c: '#FFF8EC', glow: Math.min(2, geo.dot * .3), a: 1 };
+  });
 }
 function fmtDate(s) {
   const d = new Date(s + 'T12:00:00');
@@ -1307,7 +1392,7 @@ function renderHome() {
     const card = document.createElement('div'); card.className = 'pcard';
     const name = personName(p);
     const outrun = p.parentAge >= 100;
-    const canLog = prem || p.freeWall;
+    const canLog = prem || p.freeWall || p.parentAge >= 100;
     const m = outrun ? null : personModel(p);
     const streak = callStreak(p);
     const logs = (p.logs || []).slice().sort((a, b) => b.d.localeCompare(a.d));
@@ -1319,10 +1404,10 @@ function renderHome() {
       html += '<div class="paceline">' + (m.tier === 'floor'
         ? 'Whatever the math says, the move is the same: plan the next visit.'
         : 'at ' + lower(m.fq.label) + ' — it isn’t fixed') + '</div>';
-      if (p.plan && p.plan.freqId && p.plan.freqId !== p.freqId) {
+      // only show a pending plan — once a logged visit confirms it, the headline number already counts it
+      if (p.plan && p.plan.freqId && p.plan.freqId !== p.freqId && p.plan.freqId !== effFreqId(p)) {
         const planned = personModel(p, p.plan.freqId);
-        const cur = personModel(p, p.freqId);
-        const d = planned.left - cur.left;
+        const d = planned.left - m.left;
         html += '<div class="planline">your plan: ' + lower(freqOf(p.plan.freqId).label) + (d > 0 ? ' · +' + d + ' visits' : '') + '</div>';
       }
     } else {
@@ -1428,7 +1513,7 @@ function drawPlanner(base, sim, d) {
   const cw = Math.min(innerWidth, 500) - 48;
   const maxH = Math.floor(innerHeight * .34);
   const total = base.soFarDots + Math.max(base.leftDots, sim.leftDots);
-  PL.geo = fitGrid(total, cw, maxH, 10, 7);
+  PL.geo = fitGrid(total, cw, maxH, 10, 7, 34);
   const cv = $('plannerCanvas'), dpr = Math.min(2.5, devicePixelRatio || 1);
   cv.width = Math.ceil(PL.geo.w * dpr); cv.height = Math.ceil(PL.geo.h * dpr);
   cv.style.width = PL.geo.w + 'px'; cv.style.height = PL.geo.h + 'px';
@@ -1481,7 +1566,7 @@ $('keepPlanBtn').onclick = () => {
   const p = PL.person;
   p.plan = { freqId: FREQS[PL.simIdx].id, setAt: Date.now() };
   save();
-  toast('New pace saved. The wall counts on it now.');
+  toast('Pace saved. It starts counting the moment you log your next visit.');
   goHome();
 };
 $('shareDeltaBtn').onclick = () => {
@@ -1525,7 +1610,7 @@ $('logSave').onclick = () => {
   save();
   closeSheet('sheet-log');
   renderHome();
-  toast('Logged. One more amber dot.');
+  toast('Logged. That one’s kept.');
   buzz(12);
   const card = [...document.querySelectorAll('.pcard')][state.people.indexOf(logPerson)];
   if (card) { card.classList.remove('glow'); void card.offsetWidth; card.classList.add('glow'); }
@@ -1590,7 +1675,8 @@ function maybeInstallBanner(trigger) {
   if (!installEligible() || openSheets.length || currentView === 'view-reveal') return;
   if (trigger === 'share' || (trigger === 'home' && state.flags.sessions >= 2)) {
     setTimeout(() => {
-      if (!openSheets.length && currentView !== 'view-reveal') $('installBanner').classList.add('on');
+      // only ever surface on home — never over the planner, reveal, or a sheet
+      if (!openSheets.length && currentView === 'view-home') $('installBanner').classList.add('on');
     }, trigger === 'share' ? 900 : 1400);
   }
 }
@@ -1605,6 +1691,7 @@ $('installLater').onclick = () => {
   state.flags.installDismissCount++; state.flags.installDismissAt = Date.now(); save();
 };
 function onSheetClosed(id) {
+  if (id === 'sheet-paywall') { clearInterval(motifTimer); motifTimer = null; }
   if (id === 'sheet-share' && state.flags.shared) maybeInstallBanner('share');
 }
 
@@ -1615,6 +1702,15 @@ if ('serviceWorker' in navigator) {
   addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
 state.flags.sessions = (state.flags.sessions || 0) + 1; save();
+/* checkout return: payment links must redirect back with ?premium=<plan> */
+try {
+  const back = new URLSearchParams(location.search).get('premium');
+  if (back && PAYMENTS.enabled && ['weekly', 'annual', 'lifetime'].includes(back) && !Premium.isActive()) {
+    Premium.grant(back, 'checkout');
+    history.replaceState(null, '', location.pathname);
+    toast('You’re in. Go make the number bigger.');
+  }
+} catch (e) {}
 if (state.people.length) goHome();
 else openInput(null);
 </script>

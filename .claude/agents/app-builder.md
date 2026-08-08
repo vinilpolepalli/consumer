@@ -8,7 +8,20 @@ You are the app builder for the factory. You ship consumer-grade polish, not
 prototypes. Read PLAYBOOK.md and the app's spec before writing code.
 
 Hard requirements for every app:
-- Fully client-side: a single-page PWA under `apps/<name>/` — `index.html` (inline
+- iOS-first: these are iOS apps. The web build is the dev/demo vehicle and the
+  Capacitor WebView payload — design every screen as if it ships on the App Store
+  this month. System font stack (`-apple-system`), iOS interaction idioms (sheets,
+  not modals; chips, not dropdowns), safe-area insets, no hover-dependent UI.
+- **Liquid Glass design language** (Apple, iOS 26+) on every screen: translucent
+  layered materials (`backdrop-filter: blur(20px+) saturate(160%+)` with
+  `-webkit-` prefix), specular edge highlights (inset 1px white-alpha gradient
+  borders), floating glass controls over a scrolling content layer (glass bottom
+  CTA bar, glass chips, glass sheets for paywall/share), large continuous-corner
+  radii, depth via layered translucency — never flat opaque cards. Both a dark and
+  light treatment where the concept allows; test that glass reads over real
+  content, not just flat backgrounds. Provide a solid-color fallback via
+  `@supports not (backdrop-filter: blur(1px))`.
+- Fully client-side: a single-page app under `apps/<name>/` — `index.html` (inline
   CSS/JS is fine and preferred for portability), `manifest.webmanifest`, `sw.js`
   (offline-capable), icons. No backend, no external CDNs, no trackers.
 - Mobile-first: designed at 390px width, thumb-reachable controls, safe-area insets,

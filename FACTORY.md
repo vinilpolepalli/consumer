@@ -71,13 +71,19 @@ number, not a rewrite.
 
 ## Product strategy
 
-- **PWA first.** Every app is a self-contained, installable progressive web app —
-  zero backend, zero API keys, deployable to any static host the moment a domain
-  exists. This is what lets the factory ship in days.
-- **App Store second.** Once an app proves demand, wrap it with Capacitor and run the
-  vendored [`app-store-approval`](.claude/skills/app-store-approval/SKILL.md) audit
-  before submission. (Requires the human's Apple Developer account — see
-  [docs/NEEDS-FROM-HUMAN.md](docs/NEEDS-FROM-HUMAN.md).)
+- **These are iOS apps.** Every app targets the App Store: iOS interaction idioms,
+  system typography, and Apple's **Liquid Glass** design language (translucent
+  layered materials, backdrop blur, specular edges, floating glass controls) on
+  every screen. Each app ships with Capacitor iOS scaffolding, purpose strings, and
+  a privacy manifest prepared, and is gated by the vendored
+  [`app-store-approval`](.claude/skills/app-store-approval/SKILL.md) audit.
+  The final archive/sign/submit step runs on a Mac with the human's Apple
+  Developer account — see [docs/NEEDS-FROM-HUMAN.md](docs/NEEDS-FROM-HUMAN.md);
+  everything up to that step is autonomous.
+- **The web build is the vehicle, not the product.** The same client-side app is the
+  Capacitor WebView payload, the instant PWA demo for review, and the zero-cost
+  landing page — one codebase, three uses. This is what lets the factory ship in
+  days without waiting on Apple accounts.
 - **The result screen is the ad.** Every app must produce a screenshot-worthy,
   shareable result card — that card is the viral reel's payload.
 - **Paywall from day one.** Every app has a designed paywall moment (soft-locked
