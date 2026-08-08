@@ -645,7 +645,45 @@ try { state = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem('lv_st
 catch (e) { state = JSON.parse(JSON.stringify(DEFAULTS)); }
 state.flags = Object.assign({}, DEFAULTS.flags, state.flags || {});
 if (!Array.isArray(state.people)) state.people = [];
-const save = () => { try { localStorage.setItem('lv_state', JSON.stringify(state)); } catch (e) {} };
+
+/* Durability (AUDIT PWA-2): localStorage is evictable under storage pressure /
+   Safari ITP. Mirror state into IndexedDB and restore from it when localStorage
+   comes back empty; ask for persistent storage once real data exists. */
+const IDB = {
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('lv', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    });
+  },
+  async set(k, v) { try { const db = await this.open(); const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); } catch (e) {} },
+  async get(k) {
+    try {
+      const db = await this.open();
+      return await new Promise((res, rej) => { const r = db.transaction('kv').objectStore('kv').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    } catch (e) { return undefined; }
+  }
+};
+const save = () => {
+  try { localStorage.setItem('lv_state', JSON.stringify(state)); } catch (e) {}
+  if (window.indexedDB) IDB.set('lv_state', JSON.stringify(state));
+  if (state.people.length && navigator.storage && navigator.storage.persist && !save._p) { save._p = true; navigator.storage.persist().catch(() => {}); }
+};
+if (!state.people.length && window.indexedDB) {
+  IDB.get('lv_state').then(v => {
+    if (!v) return;
+    try {
+      const rec = Object.assign({}, DEFAULTS, JSON.parse(v) || {});
+      if (Array.isArray(rec.people) && rec.people.length && !state.people.length) {
+        state = rec; state.flags = Object.assign({}, DEFAULTS.flags, state.flags || {});
+        try { localStorage.setItem('lv_state', v); } catch (e) {}
+        if (typeof goHome === 'function' && document.readyState === 'complete') goHome();
+        else addEventListener('load', () => { if (state.people.length) goHome(); }, { once: true });
+      }
+    } catch (e) {}
+  });
+}
 
 const freqOf = id => FREQS.find(f => f.id === id) || FREQS[2];
 const freqIdx = id => Math.max(0, FREQS.findIndex(f => f.id === id));

@@ -36,3 +36,8 @@ _None yet._
   marketing kit (ASO listing, 3 reel scripts, launch checklist). Audit quick-fixes
   applied (manifest id, Save-image share fallback). ~27 agents, ~2M tokens total.
   Awaiting PR #1 review; merge triggers cycle 002.
+- **001-tick-2** (2026-08-08 ~16:30 UTC, scheduled): PR #1 unmerged, no comments,
+  no conflicts. Landed AUDIT PWA-2 durability fix: IndexedDB state mirror with
+  restore-on-eviction + navigator.storage.persist() once real data exists;
+  verified headless (localStorage wipe → full restore). Line still held for
+  human review.
