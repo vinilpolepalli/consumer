@@ -1,5 +1,5 @@
 /* Last Visits — offline-first service worker. Everything is local; there is no network dependency. */
-const VERSION = 'lv-v1.1.0';
+const VERSION = 'lv-v1.2.0';
 const ASSETS = [
   './',
   './index.html',

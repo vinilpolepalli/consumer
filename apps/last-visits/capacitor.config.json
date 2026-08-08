@@ -1,0 +1,13 @@
+{
+  "appId": "app.lastvisits.ios",
+  "appName": "Last Visits",
+  "webDir": ".",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0F0E0C",
+    "preferredContentMode": "mobile"
+  },
+  "server": {
+    "iosScheme": "lastvisits"
+  }
+}
