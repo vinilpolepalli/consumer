@@ -9,8 +9,10 @@ export const meta = {
   ],
 }
 
-const theme = (args && args.theme) || 'open — hunt broadly'
-const avoid = (args && args.avoid && args.avoid.join(', ')) || 'none yet'
+const ARGS = (typeof args === 'string') ? JSON.parse(args) : args
+
+const theme = (args && ARGS.theme) || 'open — hunt broadly'
+const avoid = (args && ARGS.avoid && ARGS.avoid.join(', ')) || 'none yet'
 
 const RECON_SCHEMA = { type: 'object', properties: { findings: { type: 'array', items: { type: 'object', properties: { fact: { type: 'string' }, source: { type: 'string' }, relevance: { type: 'string' } }, required: ['fact', 'relevance'] } }, summary: { type: 'string' } }, required: ['findings', 'summary'] }
 const IDEAS_SCHEMA = { type: 'object', properties: { ideas: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, one_liner: { type: 'string' }, viral_reel_script: { type: 'string' }, why_it_spreads: { type: 'string' }, target_user: { type: 'string' }, core_loop: { type: 'string' }, monetization: { type: 'string' }, buildable_without_api_keys: { type: 'boolean' }, build_effort_days: { type: 'number' }, existing_competitors: { type: 'string' } }, required: ['name', 'one_liner', 'viral_reel_script', 'why_it_spreads', 'target_user', 'core_loop', 'monetization', 'buildable_without_api_keys', 'build_effort_days'] } } }, required: ['ideas'] }

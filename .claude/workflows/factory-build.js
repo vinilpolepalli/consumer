@@ -10,9 +10,11 @@ export const meta = {
   ],
 }
 
-if (!args || !args.slug || !args.idea) throw new Error('factory-build requires args: { slug, idea }')
-const slug = args.slug
-const idea = typeof args.idea === 'string' ? args.idea : JSON.stringify(args.idea, null, 2)
+const ARGS = (typeof args === 'string') ? JSON.parse(args) : args
+
+if (!ARGS || !ARGS.slug || !ARGS.idea) throw new Error('factory-build requires args: { slug, idea }')
+const slug = ARGS.slug
+const idea = typeof ARGS.idea === 'string' ? ARGS.idea : JSON.stringify(ARGS.idea, null, 2)
 const appDir = `apps/${slug}`
 
 const SPEC_SCHEMA = { type: 'object', properties: { spec: { type: 'string' } }, required: ['spec'] }
