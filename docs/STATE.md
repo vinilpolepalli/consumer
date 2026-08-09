@@ -8,12 +8,13 @@ history.
 
 | Field | Value |
 |---|---|
-| Cycle | 001 |
-| Phase | **review** — Last Visits through the full pipeline, awaiting human review of PR #1 |
-| Current app | **Last Visits** (`apps/last-visits/`) — built, critiqued (54 findings applied), QA ship verdict, Liquid Glass retrofit, audited, marketing kit done |
-| Open PR | [#1](https://github.com/vinilpolepalli/consumer/pull/1) (draft — merge starts app #2) |
+| Cycle | 002 |
+| Phase | **build** — The Tab in the build squad; Last Visits complete, awaiting review |
+| Current app | **The Tab** (`apps/the-tab/`, branch `claude/app-002-the-tab`) — backlog #2 (7.33), judge flaw fixed via one-time-unlock pricing |
+| Done, in review | **Last Visits** — full pipeline complete on PR [#1](https://github.com/vinilpolepalli/consumer/pull/1) (draft) |
+| Open PRs | #1 (Last Visits + factory), #2 (The Tab, stacked on #1 — opens when build lands) |
 | Loop | **Live** — Routine `trig_01PTBwaYNDWDAA7WerV2Jm8n`, every 8h (pause via claude.ai/code → Routines) |
-| Demo | Private artifact: https://claude.ai/code/artifact/64c05eb4-b7b2-4b22-be50-2d132fbd88a1 |
+| Demo | Last Visits: https://claude.ai/code/artifact/64c05eb4-b7b2-4b22-be50-2d132fbd88a1 |
 
 ## Shipped apps
 
@@ -36,6 +37,13 @@ _None yet._
   marketing kit (ASO listing, 3 reel scripts, launch checklist). Audit quick-fixes
   applied (manifest id, Save-image share fallback). ~27 agents, ~2M tokens total.
   Awaiting PR #1 review; merge triggers cycle 002.
+- **002** (2026-08-09 ~00:25 UTC, scheduled tick): Last Visits pipeline fully done →
+  per continuous-loop mandate, started app #2 without waiting on review. **The Tab**
+  (backlog #2, 7.33 — lifetime-cost-of-habits slot-machine receipt). Judge flaw
+  ("app that preaches against subscriptions can't sell one") fixed in the brief:
+  single $14.99 lifetime unlock, no subscription. Reused cycle-001 research (16h
+  old, unconsumed backlog — next research swarm runs for app #3). Build squad
+  launched on branch `claude/app-002-the-tab`; stacked draft PR to follow.
 - **001-tick-2** (2026-08-08 ~16:30 UTC, scheduled): PR #1 unmerged, no comments,
   no conflicts. Landed AUDIT PWA-2 durability fix: IndexedDB state mirror with
   restore-on-eviction + navigator.storage.persist() once real data exists;
