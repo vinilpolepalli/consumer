@@ -1,5 +1,5 @@
 /* The Tab — offline-first service worker. Everything is local; there is no network dependency. */
-const VERSION = 'thetab-v1.0.0';
+const VERSION = 'thetab-v1.1.0';
 const ASSETS = [
   './',
   './index.html',
