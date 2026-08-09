@@ -8,13 +8,11 @@ history.
 
 | Field | Value |
 |---|---|
-| Cycle | 002 |
-| Phase | **build** — The Tab in the build squad; Last Visits complete, awaiting review |
-| Current app | **The Tab** (`apps/the-tab/`, branch `claude/app-002-the-tab`) — backlog #2 (7.33), judge flaw fixed via one-time-unlock pricing |
-| Done, in review | **Last Visits** — full pipeline complete on PR [#1](https://github.com/vinilpolepalli/consumer/pull/1) (draft) |
-| Open PRs | #1 (Last Visits + factory), #2 (The Tab, stacked on #1 — opens when build lands) |
+| Cycle | 002 — **complete**; cycle 003 starts next scheduled tick (research swarm, avoid: Last Visits, The Tab) |
+| Phase | review ×2 — both apps through the full pipeline, awaiting human review |
+| Done, in review | **Last Visits** (PR [#1](https://github.com/vinilpolepalli/consumer/pull/1)) · **The Tab** (PR [#2](https://github.com/vinilpolepalli/consumer/pull/2), stacked on #1) |
 | Loop | **Live** — Routine `trig_01PTBwaYNDWDAA7WerV2Jm8n`, every 8h (pause via claude.ai/code → Routines) |
-| Demo | Last Visits: https://claude.ai/code/artifact/64c05eb4-b7b2-4b22-be50-2d132fbd88a1 |
+| Demos | Last Visits: https://claude.ai/code/artifact/64c05eb4-b7b2-4b22-be50-2d132fbd88a1 · The Tab: https://claude.ai/code/artifact/936d98a9-0c45-4c5a-accd-27fa7bcff926 |
 
 ## Shipped apps
 
@@ -37,6 +35,13 @@ _None yet._
   marketing kit (ASO listing, 3 reel scripts, launch checklist). Audit quick-fixes
   applied (manifest id, Save-image share fallback). ~27 agents, ~2M tokens total.
   Awaiting PR #1 review; merge triggers cycle 002.
+- **002-complete** (2026-08-09 ~02:20 UTC): The Tab through the full pipeline —
+  build squad (12 agents, ~1.2M tokens): 4 specs → build → 5 critics (38 findings
+  applied) → QA **ship** → orchestrator design pass (3 leftover fixes). Ship squad:
+  AUDIT.md (0 HARD BLOCK — PWA shippable today; 1 LIKELY REJECTION on the honest
+  commerce stub, resolves when payments go live), marketing kit (ASO targets the
+  unowned habit-cost App Store gap; flagship reel "$848,137"). iOS parity files
+  added. Draft PR #2 open (stacked on #1). Both apps now await review.
 - **002** (2026-08-09 ~00:25 UTC, scheduled tick): Last Visits pipeline fully done →
   per continuous-loop mandate, started app #2 without waiting on review. **The Tab**
   (backlog #2, 7.33 — lifetime-cost-of-habits slot-machine receipt). Judge flaw
