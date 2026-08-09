@@ -1,0 +1,2236 @@
+<!doctype html>
+<html lang="en" data-appearance="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0C0E12">
+<meta name="description" content="Type a habit. See the lifetime tab — and what it could've been worth by 65.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Tab">
+<title>The Tab</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --bg:#0C0E12; --glow:#151A24;
+  --ink:#F4F6F8; --ink2:#A7AEBB; --ink3:#6C7380;
+  --glass:rgba(255,255,255,.08); --glass2:rgba(255,255,255,.13);
+  --edge:rgba(255,255,255,.15); --edge-hi:rgba(255,255,255,.30);
+  --line:rgba(255,255,255,.14);
+  --red:#FF6B57; --green:#4ED99B;
+  --cta-bg:#F8F4EA; --cta-ink:#211F1A; --cta-edge:rgba(255,255,255,.35);
+  --sheetbg:rgba(19,23,31,.74); --scrim:rgba(4,6,10,.5); --barbg:rgba(14,17,23,.6);
+  --blur:blur(24px) saturate(180%); --blur-l:blur(14px) saturate(160%);
+  --mono:ui-monospace,"SF Mono","SFMono-Regular",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Helvetica Neue",sans-serif;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+html[data-appearance="light"]{
+  --bg:#EDEAE2; --glow:#F7F5EF;
+  --ink:#16181C; --ink2:#565D68; --ink3:#8A9099;
+  --glass:rgba(255,255,255,.55); --glass2:rgba(255,255,255,.75);
+  --edge:rgba(22,24,28,.14); --edge-hi:rgba(255,255,255,.75);
+  --line:rgba(22,24,28,.12);
+  --red:#B02E18; --green:#0E7A4E;
+  --cta-bg:#FFFFFF; --cta-ink:#211F1A; --cta-edge:#DED7C6;
+  --sheetbg:rgba(250,248,242,.78); --scrim:rgba(30,28,22,.35); --barbg:rgba(244,241,233,.6);
+}
+@media (prefers-color-scheme:light){
+  html[data-appearance="system"]{
+    --bg:#EDEAE2; --glow:#F7F5EF;
+    --ink:#16181C; --ink2:#565D68; --ink3:#8A9099;
+    --glass:rgba(255,255,255,.55); --glass2:rgba(255,255,255,.75);
+    --edge:rgba(22,24,28,.14); --edge-hi:rgba(255,255,255,.75);
+    --line:rgba(22,24,28,.12);
+    --red:#B02E18; --green:#0E7A4E;
+    --cta-bg:#FFFFFF; --cta-ink:#211F1A; --cta-edge:#DED7C6;
+    --sheetbg:rgba(250,248,242,.78); --scrim:rgba(30,28,22,.35); --barbg:rgba(244,241,233,.6);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.45;
+  overscroll-behavior-y:none;overflow:hidden}
+body::before{content:"";position:fixed;inset:-15%;z-index:-1;pointer-events:none;background:
+  radial-gradient(46% 34% at 50% 6%, var(--glow), transparent 74%),
+  radial-gradient(40% 30% at 12% 82%, rgba(255,107,87,.05), transparent 72%),
+  radial-gradient(44% 32% at 90% 66%, rgba(78,217,155,.045), transparent 72%),
+  var(--bg)}
+button{font-family:var(--sans);color:inherit;background:none;border:0;cursor:pointer;font-size:17px}
+button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--edge-hi);outline-offset:2px}
+input{font-family:var(--sans);color:var(--ink);font-size:17px;outline:none}
+.num{font-variant-numeric:tabular-nums}
+.microlabel{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+
+/* ---------- glass primitives ---------- */
+.glass{background:var(--glass);-webkit-backdrop-filter:var(--blur-l);backdrop-filter:var(--blur-l);
+  border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--edge-hi)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  html .glass{background:#191E28}
+  html[data-appearance="light"] .glass{background:#F4F1E9}
+  html .sheet{background:#161B24}
+  html[data-appearance="light"] .sheet{background:#F4F1E9}
+  html .bar{background:var(--bg)}
+}
+.chip{min-height:44px;padding:10px 15px;border-radius:999px;font-size:15px;font-weight:500;color:var(--ink);
+  display:inline-flex;align-items:center;gap:6px;transition:transform .12s,background .15s}
+.chip:active{transform:scale(.96)}
+.chip.sel{background:var(--glass2);border-color:var(--edge-hi);font-weight:600;
+  box-shadow:inset 0 1px 0 var(--edge-hi),0 4px 18px rgba(0,0,0,.25)}
+.iconbtn{min-width:44px;min-height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--ink2)}
+.iconbtn:active{background:var(--glass)}
+.iconbtn svg{width:21px;height:21px}
+
+/* CTA — a printed paper pill floating in glass */
+.cta{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;border-radius:20px;
+  background:var(--cta-bg);color:var(--cta-ink);border:1px solid var(--cta-edge);
+  font:700 15px/1 var(--mono);letter-spacing:.14em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 10px 30px rgba(0,0,0,.35);
+  transition:transform .12s,opacity .25s}
+.cta:active{transform:scale(.975)}
+.cta:disabled{opacity:.4}
+.btn2{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;border-radius:18px;
+  font-size:16px;font-weight:600;transition:transform .12s}
+.btn2:active{transform:scale(.975)}
+.quiet{color:var(--ink2);font-size:15px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;border-radius:12px}
+.quiet:active{color:var(--ink);background:var(--glass)}
+.locksvg{width:13px;height:13px;flex:0 0 13px;opacity:.85}
+
+/* ---------- views ---------- */
+.view{position:fixed;inset:0;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  padding:calc(var(--sat) + 14px) 20px calc(var(--sab) + 16px)}
+.view.active{display:flex}
+.view>*{flex-shrink:0}
+.bar{position:sticky;bottom:0;z-index:5;margin:20px -20px calc(-1 * (var(--sab) + 16px));margin-top:auto;
+  padding:12px 20px calc(var(--sab) + 14px);display:flex;flex-direction:column;gap:10px;
+  background:var(--barbg);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  border-top:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--edge-hi)}
+.topline{display:flex;align-items:center;justify-content:space-between;min-height:48px}
+.wordmark{font:700 14px/1 var(--mono);letter-spacing:.3em;color:var(--ink2)}
+
+/* ---------- input screen ---------- */
+.prompt{font-size:28px;line-height:1.2;font-weight:800;letter-spacing:-.02em;margin:12px 0 4px}
+.subline{font-size:15px;color:var(--ink2);margin-bottom:16px}
+.field-label{font:600 11px/1 var(--mono);letter-spacing:.14em;color:var(--ink3);margin:20px 0 9px;display:block}
+#habitName{width:100%;min-height:54px;padding:14px 16px;border-radius:18px;background:var(--glass);
+  border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--edge-hi)}
+#habitName::placeholder{color:var(--ink3)}
+#habitName:focus{border-color:var(--edge-hi)}
+.chiprail{display:flex;gap:8px;overflow-x:auto;margin:10px -20px 0;padding:2px 20px 6px;scrollbar-width:none}
+.chiprail::-webkit-scrollbar{display:none}
+.chiprail .chip{flex:0 0 auto;white-space:nowrap}
+.costwrap{text-align:center;margin-top:4px}
+.costline{display:inline-flex;align-items:baseline;gap:2px;border-bottom:2px solid var(--line);padding:0 8px 6px;min-width:150px;justify-content:center}
+.costline:focus-within{border-color:var(--ink2)}
+#cost{width:9ch;background:none;border:0;font:700 40px/1.1 var(--mono);font-variant-numeric:tabular-nums;
+  text-align:left;color:var(--ink);caret-color:var(--red)}
+#cost::placeholder{color:var(--ink3);opacity:.55}
+#cost:focus-visible{outline:none}
+.costline .dollar{font:700 30px/1 var(--mono);color:var(--ink2)}
+.nudge{font-size:13px;color:var(--ink2);text-align:center;margin-top:8px;min-height:18px}
+.freqgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.freqgrid .chip{border-radius:16px;justify-content:center;text-align:center}
+.agerow{display:flex;align-items:center;gap:16px;margin-top:2px}
+#ageOut{font:700 30px/1 var(--mono);font-variant-numeric:tabular-nums;min-width:2.4ch;text-align:center}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:44px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-11px;border-radius:50%;
+  background:var(--cta-bg);border:1px solid var(--cta-edge);box-shadow:0 3px 10px rgba(0,0,0,.4)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--cta-bg);border:1px solid var(--cta-edge)}
+.agehint{font-size:13px;color:var(--ink3);margin-top:2px;min-height:18px;margin-bottom:18px}
+#preview{font:500 13px/1.5 var(--mono);color:var(--ink2);text-align:center;min-height:20px;font-variant-numeric:tabular-nums}
+.duelbanner{margin-top:10px;padding:10px 14px;border-radius:14px;font-size:14px;color:var(--ink2)}
+
+/* ---------- receipt paper ---------- */
+.paperwrap{filter:drop-shadow(0 18px 34px rgba(0,0,0,.5));width:320px;max-width:100%;margin:0 auto}
+html[data-appearance="light"] .paperwrap{filter:drop-shadow(0 14px 26px rgba(22,24,28,.24))}
+/* dark papers need an edge to survive on the dark app background */
+.paperwrap:has(.paper[data-rt="carbon"]),.paperwrap:has(.paper[data-rt="topshelf"]){
+  filter:drop-shadow(0 0 1px rgba(255,255,255,.32)) drop-shadow(0 0 16px rgba(255,255,255,.05)) drop-shadow(0 18px 34px rgba(0,0,0,.55))}
+html[data-appearance="light"] .paperwrap:has(.paper[data-rt="carbon"]),
+html[data-appearance="light"] .paperwrap:has(.paper[data-rt="topshelf"]){
+  filter:drop-shadow(0 0 1px rgba(255,255,255,.16)) drop-shadow(0 14px 26px rgba(22,24,28,.3))}
+.paper{--rp:#F8F4EA;--ri:#211F1A;--rs:#C7381F;--rf:#0E7A4E;
+  background:var(--rp);color:var(--ri);font-family:var(--mono);font-variant-numeric:tabular-nums;
+  padding:22px 18px 26px;position:relative;width:100%}
+.paper[data-rt="carbon"]{--rp:#17181B;--ri:#F2EFE6;--rs:#FF6B57;--rf:#4ED99B}
+.paper[data-rt="diner"]{--rp:#F6E9B8;--ri:#2A3B8F;--rs:#C7381F;--rf:#0E6B45}
+.paper[data-rt="topshelf"]{--rp:#101013;--ri:#E8C97A;--rs:#E8C97A;--rf:#E8C97A}
+.paper::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;background:
+  repeating-linear-gradient(to bottom,rgba(0,0,0,.028) 0 1px,transparent 1px 4px)}
+.paper[data-rt="carbon"]::after,.paper[data-rt="topshelf"]::after{background:
+  repeating-linear-gradient(to bottom,rgba(255,255,255,.025) 0 1px,transparent 1px 4px)}
+.rbrand{font:800 18px/1.2 var(--mono);letter-spacing:.25em;text-align:center;padding-left:.25em}
+.rc{text-align:center;font-size:10px;line-height:1.75;letter-spacing:.04em}
+.rc.small{font-size:9px;color:var(--ri);opacity:.62}
+.rc.b{font-weight:700}
+.rdash{border:0;border-top:2px dashed var(--ri);opacity:.38;margin:9px 0}
+.rrule{border:0;border-top:2px solid var(--ri);margin:9px 0}
+.rkv{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;line-height:1.85}
+.rkv .k{white-space:nowrap;letter-spacing:.03em}
+.rkv .v{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rkv.bigrow{align-items:center}
+.rkv.bigrow .k{font-size:10px;font-weight:700;letter-spacing:.14em}
+.rkv.bigrow .v{font-size:24px;font-weight:800}
+.rs-col{color:var(--rs)} .rf-col{color:var(--rf)}
+.rlabel{font:700 11px/1 var(--mono);letter-spacing:.2em;text-align:center;margin:10px 0 6px}
+.rstamp{border:1.5px solid var(--rf);border-radius:8px;transform:rotate(-2deg);padding:12px 8px 10px;margin:12px 4px 6px;text-align:center;
+  box-shadow:inset 0 0 0 1px transparent;opacity:.96}
+.rstamp .sl{font:700 11px/1 var(--mono);letter-spacing:.2em;color:var(--rf)}
+.rstamp .sn{font:800 40px/1.15 var(--mono);color:var(--rf);margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.rstamp .sn.mid{font-size:32px}.rstamp .sn.long{font-size:26px}
+.rstamp .ss{font:700 11px/1 var(--mono);letter-spacing:.2em;color:var(--ri);margin-top:6px}
+.paper[data-rt="topshelf"] .rstamp .sn{width:max-content;max-width:100%;margin-left:auto;margin-right:auto}
+.paper[data-rt="topshelf"] .rstamp .sn::after{content:"";display:block;height:3px;margin-top:7px;
+  border-top:1.5px solid currentColor;border-bottom:1.5px solid currentColor}
+.rroast{text-align:center;font-size:10px;line-height:1.6;opacity:.62;margin:8px 8px 0}
+.rfine{font-size:9px;line-height:1.65;opacity:.62;text-align:center;margin-top:8px;letter-spacing:.02em}
+.rbars{display:flex;align-items:flex-end;justify-content:center;gap:0;height:30px;margin:12px auto 4px;width:210px}
+.rbars i{display:block;background:var(--ri);height:100%}
+.rfoot{text-align:center;font-size:9px;letter-spacing:.22em;font-weight:700;margin-top:5px}
+.rduo{display:flex;gap:12px;font-size:12px;line-height:1.8}
+.rduo>div{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rduo>div:last-child{text-align:right}
+.rduo.b{font-weight:700}
+.pr{opacity:0;transform:translateY(-5px);transition:opacity .28s,transform .28s}
+.pr.on{opacity:1;transform:none}
+.noanim .pr{transition:none}
+
+/* ---------- reveal ---------- */
+#v-reveal{padding-left:16px;padding-right:16px}
+#rvTop{min-height:48px;display:flex;justify-content:space-between;align-items:center;opacity:0;pointer-events:none;transition:opacity .4s}
+#rvTop.show{opacity:1;pointer-events:auto}
+#rvZone{padding-top:6px}
+@keyframes feed{0%{transform:translateY(-46%)}30%{transform:translateY(-31%)}34%{transform:translateY(-32%)}62%{transform:translateY(-13%)}66%{transform:translateY(-14%)}100%{transform:translateY(0)}}
+.feeding{animation:feed .45s cubic-bezier(.25,.6,.35,1) both}
+@keyframes thud{0%{transform:translateY(0)}42%{transform:translateY(7px)}70%{transform:translateY(-2px)}100%{transform:translateY(0)}}
+.thud{animation:thud .3s cubic-bezier(.3,.6,.35,1) both}
+.odo{display:flex;justify-content:center;align-items:center;font:800 40px/1 var(--mono);font-variant-numeric:tabular-nums;
+  color:var(--rs);height:52px;overflow:hidden}
+.odo.mid{font-size:32px}.odo.long{font-size:26px}
+.odo .st{display:flex;align-items:center;height:52px}
+.odo .colw{display:block;height:52px;overflow:hidden;position:relative;width:1ch}
+.odo .strip{display:block;will-change:transform}
+.odo .strip>i{display:flex;align-items:center;justify-content:center;height:52px;font-style:normal}
+.odo .colw.spin .strip>i{text-shadow:0 -16px 2px rgba(199,56,31,.3),0 16px 2px rgba(199,56,31,.3)}
+.odosub{text-align:center;font-size:12px;line-height:1.6;margin-top:6px;opacity:0;transition:opacity .4s}
+.odosub.on{opacity:.75}
+.flipface{transition:transform .22s cubic-bezier(.5,0,.8,.4)}
+.flipface.away{transform:perspective(700px) rotateX(-88deg)}
+.flipface.back-in{transform:perspective(700px) rotateX(88deg);transition:none}
+.flipface.back-on{transform:none;transition:transform .26s cubic-bezier(.2,.6,.3,1)}
+
+/* ---------- home ---------- */
+.glasscard{border-radius:24px;padding:18px;margin-top:14px;width:100%;text-align:left;display:block}
+#homeTotals .tl{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+#homeTotals .tlab{font:700 10px/1 var(--mono);letter-spacing:.16em;color:var(--ink3)}
+#homeTotals .tnum{font:800 26px/1.2 var(--mono);font-variant-numeric:tabular-nums}
+#homeTotals .tnum.red{color:var(--red)} #homeTotals .tnum.grn{color:var(--green)}
+#homeTotals .test{font-size:12px;color:var(--ink3);margin-top:8px}
+.stub{margin-top:16px;position:relative}
+.stub .paper{padding:16px 16px 20px}
+.stub .sname{font:700 15px/1.3 var(--mono);letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:60px}
+.stub .smeta{font-size:11px;opacity:.62;margin-top:2px}
+.stub .snums{display:flex;gap:14px;margin-top:8px;font:700 13px/1.4 var(--mono);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.stub .snums .lab{font-weight:400;font-size:10px;opacity:.62;letter-spacing:.08em}
+.stub .skept{font-size:11px;margin-top:6px;opacity:.8;font-variant-numeric:tabular-nums}
+.stub .srow{display:flex;gap:8px;margin-top:12px;align-items:center}
+.stub .skipbtn{flex:1;min-height:44px;border-radius:12px;border:1.5px solid var(--ri);background:transparent;color:var(--ri);
+  font:700 11px/1 var(--mono);letter-spacing:.12em;display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .12s}
+.stub .skipbtn:active{transform:scale(.97)}
+.stub .compbtn{min-height:44px;padding:0 10px;font-size:12px;color:var(--ri);opacity:.55;font-family:var(--mono)}
+.stub .openbtn{position:absolute;top:10px;right:8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;color:var(--ri);opacity:.6}
+.ghoststub{margin-top:16px;width:100%;min-height:74px;border-radius:18px;border:1.5px dashed var(--line);color:var(--ink2);
+  display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px;font-weight:600}
+.ghoststub:active{background:var(--glass)}
+.graphcard{border-radius:24px;padding:18px;margin-top:16px}
+.graphcard h3{font:700 11px/1 var(--mono);letter-spacing:.16em;color:var(--ink3);text-transform:uppercase}
+.graphcard .gproj{font-size:14px;color:var(--ink2);margin-top:10px;font-variant-numeric:tabular-nums}
+.graphcard .gproj b{color:var(--green);font-family:var(--mono)}
+.graphcard svg.chart{width:100%;height:130px;margin-top:8px;display:block}
+.graphcard .lockline{display:flex;align-items:center;gap:10px;color:var(--ink2);font-size:14px;margin-top:10px}
+.homefootnote{font-size:12px;color:var(--ink3);text-align:center;margin-top:18px}
+
+/* ---------- sheets ---------- */
+.scrim{position:fixed;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .28s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;transform:translateY(104%);visibility:hidden;
+  transition:transform .34s cubic-bezier(.32,.72,.28,1),visibility 0s .34s;border-radius:28px 28px 0 0;
+  background:var(--sheetbg);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  border-top:1px solid var(--edge-hi);
+  max-height:calc(100% - var(--sat) - 30px);overflow-y:auto;overscroll-behavior:contain;
+  padding:10px 20px calc(var(--sab) + 20px)}
+.sheet.open{transform:none;visibility:visible;box-shadow:0 -18px 50px rgba(0,0,0,.4);
+  transition:transform .34s cubic-bezier(.32,.72,.28,1)}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:2px auto 4px}
+.sheethead{display:flex;align-items:center;justify-content:space-between;min-height:44px}
+.sheethead h2{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.sheet .body{padding-top:4px}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;border-bottom:1px solid var(--line)}
+.srow:last-child{border-bottom:0}
+.srow .sl{font-size:16px}
+.srow .sr{display:flex;align-items:center;gap:8px;color:var(--ink2)}
+.seg{display:flex;background:var(--glass);border:1px solid var(--edge);border-radius:13px;padding:3px;gap:2px}
+.seg button{flex:1;min-height:44px;padding:0 13px;border-radius:10px;font-size:14px;font-weight:600;color:var(--ink2)}
+.seg button.sel{background:var(--glass2);color:var(--ink);box-shadow:inset 0 1px 0 var(--edge-hi)}
+.swatches{display:flex;gap:12px;margin:8px 0 4px;justify-content:center}
+.swatch{width:54px;height:66px;border-radius:12px;border:2px solid transparent;position:relative;display:flex;flex-direction:column;
+  box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.swatch.sel{border-color:var(--ink)}
+.swatch .sw-name{position:absolute;bottom:-19px;left:-8px;right:-8px;font-size:10px;color:var(--ink2);text-align:center;letter-spacing:.02em;white-space:nowrap}
+.swatch.sel .sw-name{color:var(--ink);font-weight:600}
+.swatch .lockover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22);border-radius:inherit}
+.swatchwrap{padding-bottom:22px;position:relative}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper button{width:46px;height:46px;border-radius:50%;font-size:22px;display:flex;align-items:center;justify-content:center}
+.stepper .sv{font:700 24px/1 var(--mono);min-width:2.2ch;text-align:center;font-variant-numeric:tabular-nums}
+.paypaper{margin-top:14px}
+.paypaper .paper{padding:18px 16px 22px}
+.paytitle{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-top:10px}
+.paysub{font-size:15px;color:var(--ink2);margin-top:6px}
+.sheet .cta{margin-top:16px}
+.sheet .finel{font-size:12px;color:var(--ink3);text-align:center;margin-top:12px;line-height:1.5}
+.sheetrowbtns{display:flex;justify-content:center;gap:18px;margin-top:8px}
+#shCanvas{width:100%;border-radius:14px;display:block;box-shadow:0 8px 26px rgba(0,0,0,.35)}
+.sharegrid{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:16px}
+.sharegrid .seg{align-self:stretch}
+#payCta{font-size:12.5px;letter-spacing:.1em}
+.rkv .fill{flex:1;border-bottom:2px dotted var(--ri);opacity:.3;margin:0 6px;transform:translateY(-4px)}
+.tagrow{display:flex;align-items:center;justify-content:space-between;min-height:44px;margin-top:4px}
+.tagrow label{font-size:14px;color:var(--ink2)}
+.switch{width:50px;height:30px;border-radius:15px;background:var(--glass);border:1px solid var(--edge);position:relative;transition:background .2s}
+.switch::before{content:"";position:absolute;inset:-8px -6px}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--ink2);transition:transform .2s,background .2s}
+.switch.on{background:var(--green)}
+.switch.on::after{transform:translateX(20px);background:#fff}
+.explain p{font-size:15px;color:var(--ink2);margin:12px 0;line-height:1.55}
+.explain .formula{font:600 13px/1.7 var(--mono);color:var(--ink);background:var(--glass);border:1px solid var(--edge);
+  border-radius:14px;padding:12px 14px;margin:12px 0;font-variant-numeric:tabular-nums}
+.confirmbox p{font-size:16px;color:var(--ink);margin:14px 4px 18px;line-height:1.5}
+.confirmbox .btn2{background:var(--glass);border:1px solid var(--edge)}
+.confirmbox .danger{color:var(--red);font-weight:700}
+.installsteps{font-size:15px;color:var(--ink2);line-height:1.6;margin-top:10px}
+.installsteps b{color:var(--ink)}
+.installsteps .step{display:flex;gap:12px;align-items:flex-start;margin-top:12px}
+.installsteps .n{font:700 13px/1 var(--mono);width:26px;height:26px;border-radius:50%;background:var(--glass);border:1px solid var(--edge);
+  display:flex;align-items:center;justify-content:center;flex:0 0 26px;color:var(--ink)}
+
+/* ---------- banner + toast ---------- */
+#banner{position:fixed;left:14px;right:14px;bottom:calc(var(--sab) + 96px);z-index:35;border-radius:18px;
+  padding:12px 8px 12px 16px;display:none;align-items:center;gap:10px;transform:translateY(20px);opacity:0;
+  transition:transform .35s,opacity .35s}
+#banner.on{display:flex;transform:none;opacity:1}
+#banner .bt{flex:1;font-size:14px;color:var(--ink)}
+#banner .badd{font:700 12px/1 var(--mono);letter-spacing:.1em;min-height:40px;padding:0 16px;border-radius:12px;
+  background:var(--cta-bg);color:var(--cta-ink)}
+#toast{position:fixed;left:50%;bottom:calc(var(--sab) + 104px);transform:translateX(-50%) translateY(14px);z-index:60;
+  border-radius:15px;padding:11px 18px;font-size:14px;color:var(--ink);opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;width:max-content;max-width:min(88vw,352px);text-align:center;display:flex;gap:14px;align-items:center}
+#toast.on{opacity:1;transform:translateX(-50%);pointer-events:auto}
+#toast button{color:var(--green);font-weight:700;font-size:14px;min-height:32px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= S1 INPUT ================= -->
+<section class="view active" id="v-input">
+  <div class="topline">
+    <button class="iconbtn" id="inBack" hidden aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <span class="wordmark">THE TAB</span>
+    <button class="iconbtn" id="btnSettings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+    </button>
+  </div>
+
+  <div class="duelbanner glass" id="duelBanner" hidden>Their habit now. Side two of the duel.</div>
+
+  <h1 class="prompt" id="inTitle">What's the habit?</h1>
+  <p class="subline" id="inSub">The habit, the cost, how often. The register does the rest.</p>
+
+  <input id="habitName" type="text" maxlength="28" autocomplete="off" autocapitalize="words" placeholder="DoorDash, lattes, vapes&hellip;" aria-label="The habit">
+  <div class="chiprail" id="chipRail" role="list"></div>
+
+  <label class="field-label" for="cost">WHAT ONE ROUND COSTS</label>
+  <div class="costwrap">
+    <div class="costline">
+      <span class="dollar">$</span><input id="cost" type="text" inputmode="decimal" placeholder="19" autocomplete="off" aria-label="What one round costs, dollars">
+    </div>
+    <div class="nudge" id="costNudge"></div>
+  </div>
+
+  <span class="field-label">HOW OFTEN</span>
+  <div class="freqgrid" id="freqGrid"></div>
+
+  <span class="field-label" id="ageLabel">YOUR AGE</span>
+  <div class="agerow">
+    <span id="ageOut" class="num" aria-hidden="true">&#8212;&#8212;</span>
+    <input type="range" id="age" min="16" max="80" step="1" value="24" aria-label="Your age, years">
+  </div>
+  <div class="agehint" id="ageHint"></div>
+
+  <div class="bar">
+    <div id="preview"></div>
+    <button class="cta" id="runBtn" disabled>RUN MY TAB</button>
+  </div>
+</section>
+
+<!-- ================= S2/S3 REVEAL + RECEIPT ================= -->
+<section class="view" id="v-reveal">
+  <div class="topline" id="rvTop">
+    <button class="iconbtn" id="rvClose" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <span class="wordmark">THE TAB</span>
+    <span style="width:44px"></span>
+  </div>
+  <div id="rvZone">
+    <div class="paperwrap" id="rvWrap"><div class="paper" id="rvPaper"></div></div>
+  </div>
+  <div class="bar" id="rvBar" style="opacity:0;pointer-events:none;transition:opacity .5s">
+    <button class="cta" id="rvShare">SHARE RECEIPT</button>
+    <button class="btn2 glass" id="rvStack"></button>
+    <div class="sheetrowbtns">
+      <button class="quiet" id="rvAgain">Run it again</button>
+      <button class="quiet" id="rvNew">New tab</button>
+      <button class="quiet" id="rvDuel">Tab duel</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DUEL RESULT ================= -->
+<section class="view" id="v-duel">
+  <div class="topline">
+    <button class="iconbtn" id="duelClose" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <span class="wordmark">THE TAB</span>
+    <span style="width:44px"></span>
+  </div>
+  <div style="padding-top:6px">
+    <div class="paperwrap"><div class="paper" id="duelPaper"></div></div>
+  </div>
+  <div class="bar">
+    <button class="cta" id="duelShare">SHARE THE DUEL</button>
+    <div class="sheetrowbtns"><button class="quiet" id="duelBack">Back to my receipt</button></div>
+  </div>
+</section>
+
+<!-- ================= S4 HOME ================= -->
+<section class="view" id="v-home">
+  <div class="topline">
+    <span class="wordmark">THE TAB</span>
+    <button class="iconbtn" id="btnSettings2" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+    </button>
+  </div>
+  <h1 class="prompt" id="homeTitle">Your open tab</h1>
+  <button class="glasscard glass" id="homeTotals"></button>
+  <div id="stubs"></div>
+  <button class="ghoststub" id="ghostStub" hidden>
+    <svg class="locksvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+    Stack another habit
+  </button>
+  <div id="graphSection"></div>
+  <p class="homefootnote">Everything stays on your phone. Estimates, honest ones.</p>
+  <div class="bar">
+    <button class="cta" id="homeRun">+ RUN A NEW TAB</button>
+  </div>
+</section>
+
+<!-- ================= SHEETS ================= -->
+<div class="scrim" id="scrim"></div>
+
+<div class="sheet" id="sh-share" role="dialog" aria-modal="true" aria-label="Your receipt">
+  <div class="grab"></div>
+  <div class="sheethead"><h2>Your receipt</h2>
+    <button class="iconbtn shx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="body">
+    <canvas id="shCanvas" aria-label="Receipt preview"></canvas>
+    <div class="sharegrid">
+      <div class="seg" id="aspectSeg" role="group" aria-label="Aspect ratio">
+        <button data-a="45" class="num">4:5</button><button data-a="916" class="num">9:16</button>
+      </div>
+      <div class="swatchwrap"><div class="swatches" id="themeRow"></div></div>
+    </div>
+    <div class="tagrow">
+      <label for="tagT">&ldquo;THE TAB &mdash; RUN YOURS&rdquo; footer</label>
+      <button class="switch" id="tagT" role="switch" aria-checked="true" aria-label="Footer tag line"></button>
+    </div>
+    <button class="cta" id="doShare">SHARE</button>
+    <button class="btn2 glass" id="doSave" style="margin-top:10px">Save image</button>
+    <p class="finel">Assumes ~7% a year &mdash; the long-run stock market average, adjusted for inflation. An estimate, not financial advice.</p>
+  </div>
+</div>
+
+<div class="sheet" id="sh-pay" role="dialog" aria-modal="true" aria-label="House Account">
+  <div class="grab"></div>
+  <div class="sheethead"><h2></h2>
+    <button class="iconbtn shx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="body">
+    <h3 class="paytitle" id="payTitle">One habit runs free. The whole tab is one payment.</h3>
+    <p class="paysub" id="paySub">A subscription would be ironic.</p>
+    <div class="paypaper paperwrap"><div class="paper" id="payPaper"></div></div>
+    <button class="cta" id="payCta"></button>
+    <div class="sheetrowbtns">
+      <button class="quiet" id="payRestore">Restore purchase</button>
+      <button class="quiet shx">Not now</button>
+    </div>
+    <p class="finel">One-time purchase. No subscription. Ever.<br>The free tab stays free forever. This just adds more receipt.</p>
+  </div>
+</div>
+
+<div class="sheet" id="sh-explain" role="dialog" aria-modal="true" aria-label="Where the numbers come from">
+  <div class="grab"></div>
+  <div class="sheethead"><h2>Where the numbers come from</h2>
+    <button class="iconbtn shx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="body explain">
+    <div class="formula" id="exFormula" hidden></div>
+    <p>Lifetime tab: one round &times; how often &times; every year until you turn 65. Today&rsquo;s price, honestly multiplied &mdash; no inflation games, no price creep.</p>
+    <p>Invested instead: the same money, put into a broad index fund each year, growing about 7% a year &mdash; the long-run U.S. market average after inflation. Real returns bounce around. Seven percent is the boring middle.</p>
+    <p>Why 65? The classic retirement age. If you&rsquo;re already past it, the receipt runs your next ten years instead.</p>
+    <p>Both numbers are estimates, and neither is financial advice. The point isn&rsquo;t precision. The point is the gap between them.</p>
+    <button class="btn2 glass shx">Fair enough</button>
+  </div>
+</div>
+
+<div class="sheet" id="sh-settings" role="dialog" aria-modal="true" aria-label="Settings">
+  <div class="grab"></div>
+  <div class="sheethead"><h2>Settings</h2>
+    <button class="iconbtn shx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="body">
+    <div class="srow"><span class="sl">Your age</span>
+      <div class="stepper">
+        <button class="glass" id="ageMinus" aria-label="Age down">&minus;</button>
+        <span class="sv num" id="ageVal">&#8212;</span>
+        <button class="glass" id="agePlus" aria-label="Age up">+</button>
+      </div>
+    </div>
+    <div class="srow" style="flex-direction:column;align-items:flex-start;padding:12px 0">
+      <span class="sl">Receipt theme</span>
+      <div class="swatchwrap" style="margin-top:10px"><div class="swatches" id="themeRow2"></div></div>
+    </div>
+    <div class="srow"><span class="sl">Appearance</span>
+      <div class="seg" id="appearSeg">
+        <button data-m="system">Auto</button><button data-m="light">Light</button><button data-m="dark">Dark</button>
+      </div>
+    </div>
+    <button class="srow" id="setMath" style="width:100%;text-align:left"><span class="sl">How the math works</span><span class="sr">&rsaquo;</span></button>
+    <button class="srow" id="setPremium" style="width:100%;text-align:left"><span class="sl">House Account</span><span class="sr" id="premState">Closed</span></button>
+    <button class="srow" id="setInstall" style="width:100%;text-align:left"><span class="sl">Add to Home Screen</span><span class="sr">&rsaquo;</span></button>
+    <button class="srow" id="setClear" style="width:100%;text-align:left"><span class="sl" style="color:var(--red)">Clear the tab</span><span class="sr">&rsaquo;</span></button>
+    <p class="finel" style="text-align:left">Everything stays on your phone. No account, no bank link, no tracking.<br><span id="offlineDot"></span>The Tab v1 &mdash; made to be screenshotted.</p>
+  </div>
+</div>
+
+<div class="sheet" id="sh-freq" role="dialog" aria-modal="true" aria-label="Custom frequency">
+  <div class="grab"></div>
+  <div class="sheethead"><h2>How often?</h2>
+    <button class="iconbtn shx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="body">
+    <div class="srow" style="border:0"><span class="sl">Times</span>
+      <div class="stepper">
+        <button class="glass" id="cfMinus" aria-label="Fewer">&minus;</button>
+        <span class="sv num" id="cfN">3</span>
+        <button class="glass" id="cfPlus" aria-label="More">+</button>
+      </div>
+    </div>
+    <div class="seg" id="cfUnit" style="margin-top:6px">
+      <button data-u="day">a day</button><button data-u="week" class="sel">a week</button><button data-u="month">a month</button>
+    </div>
+    <button class="cta" id="cfDone" style="margin-top:18px">SET IT</button>
+  </div>
+</div>
+
+<div class="sheet" id="sh-duelstart" role="dialog" aria-modal="true" aria-label="Tab duel">
+  <div class="grab"></div>
+  <div class="sheethead"><h2>Tab duel</h2>
+    <button class="iconbtn shx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="body">
+    <p style="font-size:15px;color:var(--ink2);line-height:1.5">Two tabs, one receipt. Your current tab is side one &mdash; run theirs next, and the gap decides. Loser buys the coffee.</p>
+    <label class="field-label" for="duelLabelA">SIDE ONE PRINTS AS</label>
+    <input id="duelLabelA" type="text" maxlength="10" value="ME" autocomplete="off" style="width:100%;min-height:50px;padding:12px 16px;border-radius:16px" class="glass">
+    <label class="field-label" for="duelLabelB">SIDE TWO PRINTS AS</label>
+    <input id="duelLabelB" type="text" maxlength="10" value="THEM" autocomplete="off" style="width:100%;min-height:50px;padding:12px 16px;border-radius:16px" class="glass">
+    <button class="cta" id="duelGo" style="margin-top:18px">RUN THEIR TAB</button>
+  </div>
+</div>
+
+<div class="sheet" id="sh-confirm" role="dialog" aria-modal="true" aria-label="Confirm">
+  <div class="grab"></div>
+  <div class="body confirmbox">
+    <p id="cfmText"></p>
+    <button class="btn2 glass danger" id="cfmYes"></button>
+    <button class="btn2 glass" id="cfmNo" style="margin-top:10px"></button>
+    <button class="quiet" id="cfmAlt" hidden style="width:100%;margin-top:8px"></button>
+  </div>
+</div>
+
+<div class="sheet" id="sh-ios" role="dialog" aria-modal="true" aria-label="Add to Home Screen">
+  <div class="grab"></div>
+  <div class="sheethead"><h2>Keep your tab close</h2>
+    <button class="iconbtn shx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="body">
+    <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+      <img src="icon-192.png" alt="" width="52" height="52" style="border-radius:12px">
+      <p style="font-size:15px;color:var(--ink2)">Add it to your Home Screen. Receipts print faster from there.</p>
+    </div>
+    <div class="installsteps" id="stepsIOS">
+      <div class="step"><span class="n">1</span><span>Tap the <b>Share</b> button in Safari&rsquo;s toolbar <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px"><path d="M12 16V3m0 0L7 8m5-5l5 5"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/></svg></span></div>
+      <div class="step"><span class="n">2</span><span>Choose <b>Add to Home Screen</b></span></div>
+    </div>
+    <div class="installsteps" id="stepsAndroid" hidden>
+      <div class="step"><span class="n">1</span><span>Open your browser&rsquo;s <b>&#8942;</b> menu</span></div>
+      <div class="step"><span class="n">2</span><span>Choose <b>Add to Home screen</b> (or <b>Install app</b>)</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="banner" class="glass">
+  <span class="bt">Keep your tab on your home screen.</span>
+  <button class="badd" id="bAdd">ADD</button>
+  <button class="iconbtn" id="bX" aria-label="Dismiss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="16" height="16"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+
+<div id="toast" class="glass" role="status"></div>
+<div class="vh" aria-live="polite" id="srlive"></div>
+
+<script>
+'use strict';
+/* ============================================================
+   The Tab — fully client-side. Honest math only.
+   ============================================================ */
+const PAYMENTS = { keysPresent: false, price: '$14.99' };
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const LS = 'thetab.v1';
+const $ = id => document.getElementById(id);
+
+/* ---------- state ---------- */
+let S = {
+  age: null, habits: [], theme: 'thermal', aspect: '45', tagOn: true,
+  appearance: 'dark', premium: null, installSnoozed: false, installPrompted: false,
+  sharedOnce: false, sessions: 0
+};
+let storageOK = true;
+function sanitizeSaved(p) {
+  // Accept only shapes the app can actually render; anything else falls back to defaults.
+  if (!p || typeof p !== 'object' || Array.isArray(p)) return {};
+  const out = {};
+  const FK = ['d', '5w', '4w', '3w', 'w', '2m', 'm'];
+  const okFreq = f => !!f && typeof f === 'object' && (
+    FK.indexOf(f.k) >= 0 ||
+    (f.k === 'c' && Number.isFinite(f.n) && f.n >= 1 && f.n <= 99 && ['day', 'week', 'month'].indexOf(f.unit) >= 0));
+  if (Array.isArray(p.habits)) {
+    out.habits = p.habits.filter(h =>
+      h && typeof h === 'object' && typeof h.name === 'string' && h.name.trim() &&
+      Number.isFinite(h.cost) && h.cost > 0 && okFreq(h.freq)
+    ).map(h => ({
+      id: (typeof h.id === 'string' && h.id) ? h.id : 'h' + Date.now() + Math.floor(Math.random() * 999),
+      name: h.name.slice(0, 28), cost: Math.min(h.cost, 99999), freq: h.freq,
+      createdAt: Number.isFinite(h.createdAt) ? h.createdAt : Date.now(),
+      skips: (h.skips && typeof h.skips === 'object' && !Array.isArray(h.skips)) ? h.skips : {},
+      banked: (Number.isFinite(h.banked) && h.banked > 0) ? h.banked : 0
+    }));
+  }
+  const a = Math.round(Number(p.age));
+  if (Number.isFinite(a) && a >= 16 && a <= 80) out.age = a;
+  if (['thermal', 'carbon', 'diner', 'topshelf'].indexOf(p.theme) >= 0) out.theme = p.theme;
+  if (p.aspect === '45' || p.aspect === '916') out.aspect = p.aspect;
+  if (typeof p.tagOn === 'boolean') out.tagOn = p.tagOn;
+  if (['system', 'light', 'dark'].indexOf(p.appearance) >= 0) out.appearance = p.appearance;
+  if (p.premium && typeof p.premium === 'object' && !Array.isArray(p.premium)) out.premium = p.premium;
+  if (p.installSnoozed === true) out.installSnoozed = true;
+  if (p.installPrompted === true) out.installPrompted = true;
+  if (p.sharedOnce === true) out.sharedOnce = true;
+  if (Number.isFinite(p.sessions) && p.sessions >= 0) out.sessions = Math.floor(p.sessions);
+  return out;
+}
+try {
+  const raw = localStorage.getItem(LS);
+  if (raw) S = Object.assign(S, sanitizeSaved(JSON.parse(raw)));
+  localStorage.setItem('thetab.ping', '1'); localStorage.removeItem('thetab.ping');
+} catch (e) { storageOK = false; }
+function save() { if (!storageOK) return; try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
+
+/* ---------- premium (single gate) ---------- */
+const Premium = { isActive() { return !!S.premium; } };
+function unlockPremium() {
+  // Stub mode: PAYMENTS.keysPresent === false. When keys exist, only these
+  // internals change to invoke the store purchase flow. Never fake a charge.
+  S.premium = { unlockedAt: Date.now(), method: 'early-access' };
+  save();
+  window.dispatchEvent(new Event('premiumchange'));
+}
+
+/* ---------- math contract ---------- */
+const FREQS = [
+  { k: 'd',  label: 'Every day',    py: 365, r: 'EVERY DAY' },
+  { k: '5w', label: '5× a week', py: 260, r: '5×/WK' },
+  { k: '4w', label: '4× a week', py: 208, r: '4×/WK' },
+  { k: '3w', label: '3× a week', py: 156, r: '3×/WK' },
+  { k: 'w',  label: 'Once a week',  py: 52,  r: 'WEEKLY' },
+  { k: '2m', label: '2× a month', py: 24, r: '2×/MO' },
+  { k: 'm',  label: 'Once a month', py: 12,  r: 'MONTHLY' },
+  { k: 'c',  label: 'Custom…' }
+];
+function perYear(f) {
+  if (f.k === 'c') return f.n * (f.unit === 'day' ? 365 : f.unit === 'week' ? 52 : 12);
+  return FREQS.find(x => x.k === f.k).py;
+}
+function freqR(f) {
+  if (f.k === 'c') return f.n + '×/' + (f.unit === 'day' ? 'DAY' : f.unit === 'week' ? 'WK' : 'MO');
+  return FREQS.find(x => x.k === f.k).r;
+}
+function freqNice(f) {
+  if (f.k === 'c') return f.n + '× a ' + f.unit;
+  return FREQS.find(x => x.k === f.k).label.toLowerCase();
+}
+function calc(cost, freq, age) {
+  const py = perYear(freq);
+  const over = age >= 65;
+  const years = over ? 10 : Math.max(0, 65 - age);
+  const annual = cost * py;
+  const lifetime = annual * years;
+  const invested = annual * ((Math.pow(1.07, years) - 1) / 0.07);
+  return {
+    py, years, annual, lifetime, invested, over,
+    rounds: Math.round(py * years),
+    horizon: over ? 'BY AGE ' + (age + 10) : 'BY AGE 65',
+    heroLabel: over ? 'IF INVESTED — 10 YRS' : 'IF YOU’D INVESTED IT',
+    maxed: lifetime > 99999999 || invested > 99999999
+  };
+}
+const MAXCAP = 99999999;
+function money(x) {
+  if (x > MAXCAP) return '$99,999,999+';
+  return '$' + Math.round(x).toLocaleString('en-US');
+}
+function moneyC(x) {
+  return '$' + x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/* ---------- voice ---------- */
+const ESSENTIALS = ['rent','grocer','gas','insurance','meds','medication','insulin','prescription','therapy','daycare','childcare','diaper','utilit','tuition','mortgage','electric bill','water bill'];
+function isEssential(name) { const n = (name || '').toLowerCase(); return ESSENTIALS.some(e => n.includes(e)); }
+function roast(lifetime, name) {
+  if (isEssential(name)) return 'NO ROAST. SOME LINES JUST COST WHAT THEY COST.';
+  if (lifetime < 1000) return 'A ROUNDING ERROR. A CUTE ONE.';
+  if (lifetime < 10000) return 'THAT’S A USED CAR, PAID FOR IN SMALL BITES.';
+  if (lifetime < 50000) return 'A YEAR OF RENT, ITEMIZED.';
+  if (lifetime < 150000) return 'A DOWN PAYMENT, PRINTED ONE LINE AT A TIME.';
+  if (lifetime < 500000) {
+    return (name && name.length <= 14) ? ('THAT’S A HOUSE. IN ' + name.toUpperCase() + '.') : 'THAT’S A HOUSE, RUNG UP BY THE ROUND.';
+  }
+  return 'GENERATIONAL. GENUINELY.';
+}
+const DISC = ['* ~7%/YR, LONG-RUN MARKET AVG,', 'INFLATION-ADJUSTED. AN ESTIMATE,', 'NOT FINANCIAL ADVICE.'];
+
+/* ---------- receipt themes ---------- */
+const THEMES = {
+  thermal:  { name: 'Thermal',   paper: '#F8F4EA', ink: '#211F1A', stamp: '#C7381F', flip: '#0E7A4E', free: true },
+  carbon:   { name: 'Carbon',    paper: '#17181B', ink: '#F2EFE6', stamp: '#FF6B57', flip: '#4ED99B' },
+  diner:    { name: 'Diner',     paper: '#F6E9B8', ink: '#2A3B8F', stamp: '#C7381F', flip: '#0E6B45' },
+  topshelf: { name: 'Top Shelf', paper: '#101013', ink: '#E8C97A', stamp: '#E8C97A', flip: '#E8C97A' }
+};
+function activeTheme() {
+  if (!Premium.isActive() && !THEMES[S.theme].free) return 'thermal';
+  return S.theme;
+}
+
+/* ---------- helpers ---------- */
+function el(tag, cls, txt) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (txt != null) e.textContent = txt;
+  return e;
+}
+function tear(elm) {
+  const T = 7, n = 26, pts = [];
+  for (let i = 0; i <= n; i++) pts.push((i * 100 / n).toFixed(2) + '% ' + (i % 2 ? 0 : T) + 'px');
+  for (let i = n; i >= 0; i--) pts.push((i * 100 / n).toFixed(2) + '% calc(100% - ' + (i % 2 ? 0 : T) + 'px)');
+  elm.style.clipPath = 'polygon(' + pts.join(',') + ')';
+}
+function barcodeUnits(str) {
+  const s = (str && str.trim()) ? str : 'THE TAB';
+  const u = [];
+  for (const ch of s) { const c = ch.charCodeAt(0); u.push((c % 3) + 1, ((c >> 2) % 3) + 1); }
+  while (u.length < 24) u.push(1, 2);
+  return u.slice(0, 56);
+}
+function barcodeDOM(str) {
+  const wrap = el('div', 'rbars');
+  const units = barcodeUnits(str);
+  const total = units.reduce((a, b) => a + b, 0);
+  units.forEach((w, i) => {
+    const bar = el('i');
+    bar.style.width = (w / total * 100) + '%';
+    if (i % 2) bar.style.opacity = '0';
+    wrap.appendChild(bar);
+  });
+  return wrap;
+}
+function vib(ms) { try { if (!RM && navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
+function announce(t) { $('srlive').textContent = t; }
+let toastTimer = null;
+function toast(msg, action, fn, ms) {
+  const t = $('toast');
+  t.textContent = '';
+  t.appendChild(el('span', null, msg));
+  if (action) {
+    const b = el('button', null, action);
+    b.addEventListener('click', () => { hideToast(); fn && fn(); });
+    t.appendChild(b);
+  }
+  t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, ms || (action ? 5000 : 2600));
+}
+function hideToast() { $('toast').classList.remove('on'); }
+function dstamp() {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+  let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  return mm + '/' + dd + '/' + d.getFullYear() + ' ' + h + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + ap;
+}
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+/* ---------- views + sheets ---------- */
+const VIEWS = ['v-input', 'v-reveal', 'v-duel', 'v-home'];
+function show(id) {
+  VIEWS.forEach(v => $(v).classList.toggle('active', v === id));
+  $(id).scrollTop = 0;
+}
+let openSheetId = null;
+function openSheet(id) {
+  closeSheet(true);
+  openSheetId = id;
+  $('scrim').classList.add('on');
+  $(id).classList.add('open');
+}
+function closeSheet(quick) {
+  if (!openSheetId) return;
+  $(openSheetId).classList.remove('open');
+  openSheetId = null;
+  if (!quick) $('scrim').classList.remove('on');
+  else if (!document.querySelector('.sheet.open')) $('scrim').classList.remove('on');
+}
+$('scrim').addEventListener('click', () => closeSheet());
+document.querySelectorAll('.shx').forEach(b => b.addEventListener('click', () => closeSheet()));
+
+/* ---------- confirm sheet ---------- */
+let cfmFn = null, cfmAltFn = null;
+function confirmSheet(text, yes, no, fn, altText, altFn) {
+  $('cfmText').textContent = text;
+  $('cfmYes').textContent = yes;
+  $('cfmNo').textContent = no;
+  $('cfmAlt').hidden = !altText;
+  if (altText) $('cfmAlt').textContent = altText;
+  cfmFn = fn;
+  cfmAltFn = altText ? (altFn || null) : null;
+  openSheet('sh-confirm');
+}
+$('cfmYes').addEventListener('click', () => { closeSheet(); const f = cfmFn; cfmFn = cfmAltFn = null; f && f(); });
+$('cfmNo').addEventListener('click', () => { cfmFn = cfmAltFn = null; closeSheet(); });
+$('cfmAlt').addEventListener('click', () => { const f = cfmAltFn; cfmFn = cfmAltFn = null; closeSheet(); f && f(); });
+
+/* ============================================================
+   S1 — input
+   ============================================================ */
+const PRESETS = [
+  ['DoorDash', 19], ['Coffee', 6.50], ['Vapes', 12], ['Ubers', 14], ['Sephora', 52],
+  ['Energy drinks', 4], ['Lunch out', 15], ['Bar tabs', 60], ['Cigarettes', 11], ['In-app gems', 9.99]
+];
+let mode = 'first';           // first | replace | add | duel
+let cur = { name: '', cost: null, freq: null };
+let ageTouched = (S.age != null);
+let duel = null;              // {a:{...}, b:{...}, labelA, labelB}
+let currentHabitId = null;    // habit shown on the receipt screen
+
+const chipRail = $('chipRail');
+PRESETS.forEach(([n, c]) => {
+  const b = el('button', 'chip glass', n + ' ' + (c === Math.round(c) ? '$' + c : '$' + c.toFixed(2)));
+  b.addEventListener('click', () => {
+    cur.name = n; $('habitName').value = n;
+    cur.cost = c; $('cost').value = (c === Math.round(c)) ? String(c) : c.toFixed(2);
+    [...chipRail.children].forEach(x => x.classList.toggle('sel', x === b));
+    validate();
+  });
+  chipRail.appendChild(b);
+});
+
+const freqGrid = $('freqGrid');
+let cf = { n: 3, unit: 'week' };
+FREQS.forEach(f => {
+  const b = el('button', 'chip glass', f.label);
+  b.dataset.k = f.k;
+  b.addEventListener('click', () => {
+    if (f.k === 'c') { openSheet('sh-freq'); return; }
+    cur.freq = { k: f.k };
+    selFreqChip(f.k);
+    validate();
+  });
+  freqGrid.appendChild(b);
+});
+function selFreqChip(k, customLabel) {
+  [...freqGrid.children].forEach(x => {
+    x.classList.toggle('sel', x.dataset.k === k);
+    if (x.dataset.k === 'c') x.textContent = (k === 'c' && customLabel) ? customLabel : 'Custom…';
+  });
+}
+$('cfMinus').addEventListener('click', () => { cf.n = Math.max(1, cf.n - 1); $('cfN').textContent = cf.n; });
+$('cfPlus').addEventListener('click', () => { cf.n = Math.min(10, cf.n + 1); $('cfN').textContent = cf.n; });
+$('cfUnit').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+  cf.unit = b.dataset.u;
+  $('cfUnit').querySelectorAll('button').forEach(x => x.classList.toggle('sel', x === b));
+}));
+$('cfDone').addEventListener('click', () => {
+  cur.freq = { k: 'c', n: cf.n, unit: cf.unit };
+  selFreqChip('c', cf.n + '× a ' + cf.unit);
+  closeSheet();
+  validate();
+});
+
+$('habitName').addEventListener('input', e => {
+  cur.name = e.target.value;
+  [...chipRail.children].forEach(x => x.classList.remove('sel'));
+  validate();
+});
+$('cost').addEventListener('input', e => {
+  let v = e.target.value.replace(/[^0-9.]/g, '');
+  const dot = v.indexOf('.');
+  if (dot >= 0) v = v.slice(0, dot + 1) + v.slice(dot + 1).replace(/\./g, '').slice(0, 2);
+  let n = parseFloat(v);
+  if (!isNaN(n) && n > 99999) { n = 99999; v = '99999'; toast('The register stops at five digits a round. Trim a zero.'); }
+  e.target.value = v;
+  cur.cost = isNaN(n) ? null : n;
+  $('costNudge').textContent = (cur.cost != null && cur.cost >= 2000) ? 'That’s not a habit, that’s a payroll. Running it anyway.' : '';
+  validate();
+});
+const ageSlider = $('age');
+ageSlider.addEventListener('input', () => {
+  ageTouched = true;
+  if (mode !== 'duel') { S.age = +ageSlider.value; save(); }
+  validate();
+});
+if (S.age != null) ageSlider.value = S.age;
+function syncAgeUI() {
+  // Re-anchor the slider to the stored age (used after duel mode borrows it).
+  ageSlider.value = S.age != null ? S.age : 24;
+  ageTouched = S.age != null;
+  validate();
+}
+
+function validate() {
+  const age = ageTouched ? +ageSlider.value : null;
+  $('ageOut').textContent = ageTouched ? String(age) : '——';
+  if (ageTouched) {
+    if (mode === 'duel') {
+      $('ageHint').textContent = age >= 65
+        ? 'Past 65 — the receipt runs their next 10 years instead.'
+        : (65 - age) + ' years on their tab till 65.';
+    } else {
+      $('ageHint').textContent = age >= 65
+        ? 'You beat the tab. The road to 65 is behind you — so we’ll run your next 10 years instead.'
+        : (65 - age) + ' years on the tab till 65.';
+    }
+  } else $('ageHint').textContent = '';
+  const ok = cur.name.trim().length > 0 && cur.cost != null && cur.cost > 0 && cur.freq && ageTouched;
+  $('runBtn').disabled = !ok;
+  if (ok) {
+    const c = calc(cur.cost, cur.freq, age);
+    $('preview').textContent = '≈ ' + money(Math.min(c.annual, MAXCAP)) + ' a year · ' + c.years + (mode === 'duel' ? ' yrs on their tab' : ' yrs on the tab');
+  } else $('preview').textContent = '';
+}
+validate();
+
+// nudges on attempted tap of disabled CTA
+$('runBtn').parentElement.addEventListener('pointerdown', e => {
+  if (!$('runBtn').disabled) return;
+  if (!cur.name.trim()) { toast('Name the habit. Coffee counts. So does “little treats.”'); return; }
+  if (cur.cost == null) { toast('Ballpark it. The register can’t ring up a shrug.'); return; }
+  if (cur.cost === 0) { toast('Zero dollars a round? Clean tab. Try one that isn’t free.'); return; }
+  if (!cur.freq) { toast('How often does it ring? Pick a rhythm.'); return; }
+  if (!ageTouched) { toast('Set your age. The tab needs a start line.'); return; }
+});
+
+function enterInput(m, prefill) {
+  mode = m;
+  cur = { name: '', cost: null, freq: null };
+  [...chipRail.children].forEach(x => x.classList.remove('sel'));
+  selFreqChip(null);
+  $('habitName').value = ''; $('cost').value = ''; $('costNudge').textContent = '';
+  $('duelBanner').hidden = m !== 'duel';
+  $('inBack').hidden = !(S.habits.length || m === 'duel');
+  $('inTitle').textContent = m === 'duel' ? 'What’s their habit?' : (m === 'add' ? 'Stack a habit' : 'What’s the habit?');
+  $('inSub').textContent = m === 'duel' ? 'Side two of the duel. Their habit, their numbers.' : 'The habit, the cost, how often. The register does the rest.';
+  $('runBtn').textContent = m === 'duel' ? 'RUN THEIR TAB' : 'RUN MY TAB';
+  $('ageLabel').textContent = m === 'duel' ? 'THEIR AGE' : 'YOUR AGE';
+  ageSlider.setAttribute('aria-label', m === 'duel' ? 'Their age, years' : 'Your age, years');
+  if (m !== 'duel') { ageSlider.value = S.age != null ? S.age : 24; ageTouched = S.age != null; }
+  if (prefill) {
+    cur.name = prefill.name; $('habitName').value = prefill.name;
+    cur.cost = prefill.cost; $('cost').value = (prefill.cost === Math.round(prefill.cost)) ? String(prefill.cost) : prefill.cost.toFixed(2);
+    cur.freq = Object.assign({}, prefill.freq);
+    if (cur.freq.k === 'c') { cf = { n: cur.freq.n, unit: cur.freq.unit }; $('cfN').textContent = cf.n; selFreqChip('c', cf.n + '× a ' + cf.unit); }
+    else selFreqChip(cur.freq.k);
+  }
+  validate();
+  show('v-input');
+}
+$('inBack').addEventListener('click', () => {
+  if (mode === 'duel') { duel = null; syncAgeUI(); }
+  if (currentHabitId && $('rvPaper').childElementCount) show('v-reveal');
+  else if (S.habits.length) { renderHome(); show('v-home'); }
+  else show('v-input');
+});
+
+$('runBtn').addEventListener('click', () => {
+  if ($('runBtn').disabled) return;
+  vib(10);
+  const age = +ageSlider.value;
+  const snap = { name: cur.name.trim(), cost: cur.cost, freq: Object.assign({}, cur.freq), age };
+  if (mode === 'duel') {
+    duel.b = snap;
+    renderDuel();
+    show('v-duel');
+    return;
+  }
+  // persist habit
+  if (mode === 'add' && Premium.isActive()) {
+    const h = mkHabit(snap);
+    S.habits.push(h); currentHabitId = h.id;
+  } else if (S.habits.length && (mode === 'replace' || !Premium.isActive())) {
+    const old = S.habits[0];
+    const sameName = !!old && old.name.trim().toLowerCase() === snap.name.toLowerCase();
+    const doSwap = () => {
+      const h = mkHabit(snap);
+      if (sameName) {
+        // Same habit, new numbers — the streak and banked money carry over.
+        h.skips = old.skips || {};
+        h.banked = old.banked || 0;
+        h.createdAt = old.createdAt || h.createdAt;
+      }
+      S.habits[0] = h;
+      currentHabitId = h.id; save();
+      playReveal(h);
+    };
+    if (old && !sameName && (Object.keys(old.skips || {}).length || old.banked > 0)) {
+      confirmSheet(
+        'This clears ' + old.name + '’s skips and banked money too. Swap it?',
+        'Swap it', 'Keep ' + old.name, doSwap,
+        'The House Account keeps both', () => openPaywall({ intent: 'swap-add', snap })
+      );
+      return;
+    }
+    doSwap(); return;
+  } else {
+    const h = mkHabit(snap);
+    S.habits = [h]; currentHabitId = h.id;
+  }
+  save();
+  playReveal(S.habits.find(h => h.id === currentHabitId));
+});
+function mkHabit(snap) {
+  return { id: 'h' + Date.now() + Math.floor(Math.random() * 999), name: snap.name, cost: snap.cost, freq: snap.freq, createdAt: Date.now(), skips: {}, banked: 0 };
+}
+
+/* ============================================================
+   S2 — the reveal
+   ============================================================ */
+const sleep = ms => new Promise(r => setTimeout(r, RM ? 0 : ms));
+let revealToken = 0;
+
+function headerBlock(paper, opts) {
+  paper.appendChild(el('div', 'rbrand', 'THE TAB'));
+  paper.appendChild(el('div', 'rc b', opts.sub));
+  paper.appendChild(el('div', 'rc small', opts.store));
+  paper.appendChild(el('div', 'rc', dstamp() + ' · CUSTOMER: YOU'));
+}
+
+function buildOdometer(container, finalStr) {
+  const odo = el('div', 'odo');
+  if (finalStr.length > 12) odo.classList.add('long');
+  else if (finalStr.length > 9) odo.classList.add('mid');
+  const cols = [];
+  for (const ch of finalStr) {
+    if (/[0-9]/.test(ch)) {
+      const cw = el('span', 'colw');
+      const strip = el('span', 'strip');
+      for (let d = 0; d <= 10; d++) strip.appendChild(el('i', null, String(d % 10)));
+      cw.appendChild(strip);
+      odo.appendChild(cw);
+      cols.push({ cw, strip, final: +ch });
+    } else {
+      odo.appendChild(el('span', 'st', ch));
+    }
+  }
+  container.appendChild(odo);
+  return { odo, cols };
+}
+function rollOdometer(cols, dur) {
+  return new Promise(res => {
+    if (RM || !cols.length) {
+      cols.forEach(c => { c.strip.style.transform = 'translateY(' + (-c.final * 52) + 'px)'; });
+      res(); return;
+    }
+    const H = 52, t0 = performance.now(), stagger = Math.min(180, dur * 0.11);
+    const meta = cols.map((c, i) => {
+      const d = dur + i * stagger;
+      const loops = Math.max(2, Math.round(d / 1000 * 2.6));
+      return { c, d, T: loops * 10 + c.final, done: false };
+    });
+    let settled = 0;
+    function frame(now) {
+      const t = now - t0;
+      for (const m of meta) {
+        if (m.done) continue;
+        const p = Math.min(1, t / m.d);
+        const e = 1 - Math.pow(1 - p, 3);
+        const pos = m.T * e;
+        m.c.strip.style.transform = 'translateY(' + (-(pos % 10) * H) + 'px)';
+        m.c.cw.classList.toggle('spin', p < 0.62);
+        if (p >= 1) {
+          m.done = true; settled++;
+          m.c.cw.classList.remove('spin');
+          m.c.strip.style.transform = 'translateY(' + (-m.c.final * H) + 'px)';
+          vib(10);
+        }
+      }
+      if (settled < meta.length) requestAnimationFrame(frame);
+      else res();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+function countUp(elm, target, dur) {
+  return new Promise(res => {
+    if (RM) { elm.textContent = money(target); res(); return; }
+    const t0 = performance.now();
+    function frame(now) {
+      const p = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - p, 3);
+      elm.textContent = money(target * e);
+      if (p < 1) requestAnimationFrame(frame); else { elm.textContent = money(target); res(); }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+function sizeClassFor(str) { return str.length > 12 ? 'long' : (str.length > 9 ? 'mid' : ''); }
+
+async function playReveal(h, opts) {
+  const my = ++revealToken;
+  const short = opts && opts.short;
+  const c = calc(h.cost, h.freq, S.age);
+  const ess = isEssential(h.name);
+  const paper = $('rvPaper');
+  paper.dataset.rt = activeTheme();
+  paper.textContent = '';
+  paper.classList.remove('noanim');
+  tear(paper);
+  $('rvTop').classList.remove('show');
+  const bar = $('rvBar');
+  bar.style.opacity = '0'; bar.style.pointerEvents = 'none';
+  $('rvStack').innerHTML = Premium.isActive()
+    ? '+ Stack another habit'
+    : '<svg class="locksvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Stack another habit';
+  show('v-reveal');
+
+  const lifeStr = money(c.lifetime);
+  const invStr = money(c.invested); // money() clamps display at $99,999,999+
+  const sub = c.over ? '* 10-YEAR TAB *' : '* LIFETIME RECEIPT *';
+  const store = ess ? 'EVERY DOLLAR COUNTED' : 'OPEN 24 HRS · NO REFUNDS ON TIME';
+
+  // P0 — feed the stub
+  headerBlock(paper, { sub, store });
+  paper.appendChild(el('hr', 'rdash'));
+  const wrap = $('rvWrap');
+  if (!RM) { wrap.classList.remove('feeding'); void wrap.offsetWidth; wrap.classList.add('feeding'); }
+  announce('Totaling your tab.');
+
+  // P1 — the roll (front face; the label flips away with it)
+  const front = el('div', 'flipface');
+  front.appendChild(el('div', 'rlabel', c.over ? 'YOUR NEXT-10-YEARS TAB' : 'YOUR LIFETIME TAB'));
+  paper.appendChild(front);
+  const { cols } = buildOdometer(front, lifeStr);
+  const subline = el('div', 'odosub num', 'that’s ' + c.rounds.toLocaleString('en-US') + (c.over ? ' rounds in the next 10 years' : ' rounds between now and 65'));
+  front.appendChild(subline);
+  await sleep(short ? 150 : 420);
+  if (my !== revealToken) return;
+  await rollOdometer(cols, short ? 700 : 1500);
+  if (my !== revealToken) return;
+
+  // P2 — hard stop
+  subline.classList.add('on');
+  await sleep(short ? 300 : 700);
+  if (my !== revealToken) return;
+
+  // P3 — the flip
+  const back = el('div', 'flipface back-in');
+  const stamp = el('div', 'rstamp');
+  stamp.appendChild(el('div', 'sl', c.heroLabel));
+  const sn = el('div', 'sn ' + sizeClassFor(invStr), '$0');
+  stamp.appendChild(sn);
+  stamp.appendChild(el('div', 'ss', c.horizon));
+  back.appendChild(stamp);
+  if (!RM) {
+    front.classList.add('away');
+    await sleep(210);
+    if (my !== revealToken) return;
+  }
+  front.remove();
+  paper.appendChild(back);
+  vib(30);
+  wrap.classList.remove('feeding');
+  if (!RM) { wrap.classList.add('thud'); void back.offsetWidth; back.classList.add('back-on'); }
+  else { back.classList.remove('back-in'); }
+  announce('Flipped to the invested value.');
+  await countUp(sn, Math.min(c.invested, MAXCAP), short ? 400 : 800);
+  sn.textContent = invStr;
+  if (my !== revealToken) return;
+
+  // P4 — the unroll
+  const lines = [];
+  const add = (node) => { node.classList.add('pr'); paper.appendChild(node); lines.push(node); return node; };
+  const kv = (k, v, cls) => {
+    const row = el('div', 'rkv');
+    row.appendChild(el('span', 'k', k));
+    const vv = el('span', 'v num', v); if (cls) vv.classList.add(cls);
+    row.appendChild(vv);
+    return row;
+  };
+  const lifeRow = el('div', 'rkv bigrow');
+  lifeRow.appendChild(el('span', 'k', c.over ? '10-YEAR TAB' : 'LIFETIME TAB'));
+  const lv = el('span', 'v num rs-col', lifeStr); lifeRow.appendChild(lv);
+  add(lifeRow);
+  add(el('hr', 'rdash'));
+  add(kv('ITEM', h.name.toUpperCase()));
+  add(kv('ONE ROUND', moneyC(h.cost)));
+  add(kv('FREQ', freqR(h.freq)));
+  add(kv(c.over ? 'YEARS ON TAB (NEXT)' : 'YEARS ON TAB', String(c.years)));
+  add(kv('THIS YEAR', money(c.annual)));
+  if (c.maxed) add(el('div', 'rc b', 'PRINTER MAXED OUT.'));
+  add(el('hr', 'rdash'));
+  add(el('div', 'rroast', roast(c.lifetime, h.name)));
+  const fine = el('div', 'rfine'); fine.innerHTML = DISC.join('<br>');
+  add(fine);
+  add(el('div', 'rc small', 'NO REFUNDS ON TIME'));
+  add(el('div', 'rc small', 'THANK YOU FOR YOUR HABITS'));
+  add(barcodeDOM(h.name));
+  add(el('div', 'rfoot', S.tagOn ? 'THE TAB — RUN YOURS' : 'THE TAB'));
+  tear(paper);
+  for (let i = 0; i < lines.length; i++) {
+    setTimeout(() => lines[i].classList.add('on'), RM ? 0 : i * (short ? 24 : 46));
+  }
+  // tap targets for the explainer
+  stamp.style.cursor = fine.style.cursor = 'pointer';
+  stamp.addEventListener('click', openExplain);
+  fine.addEventListener('click', openExplain);
+  if (!RM) {
+    await sleep(short ? 350 : 650);
+    if (my !== revealToken) return;
+    $('v-reveal').scrollTo({ top: paper.offsetHeight * 0.28, behavior: 'smooth' });
+  }
+  await sleep(short ? 250 : 550);
+  if (my !== revealToken) return;
+
+  // P5 — actions
+  $('rvTop').classList.add('show');
+  bar.style.opacity = '1'; bar.style.pointerEvents = 'auto';
+  announce('Lifetime tab ' + lifeStr + '. If invested instead, ' + invStr + ' ' + c.horizon.toLowerCase() + '.');
+  maybeShowBanner();
+}
+
+function openExplain() {
+  const h = S.habits.find(x => x.id === currentHabitId) || S.habits[0];
+  const f = $('exFormula');
+  if (h && S.age != null) {
+    const c = calc(h.cost, h.freq, S.age);
+    f.hidden = false;
+    f.innerHTML = moneyC(h.cost) + ' × ' + c.py.toLocaleString('en-US') + ' rounds a year × ' + c.years + ' years = <b>' + money(c.lifetime) + '</b><br>' +
+      'invested each year at ~7% real → <b>' + money(c.invested) + '</b> ' + c.horizon.toLowerCase();
+  } else f.hidden = true;
+  openSheet('sh-explain');
+}
+
+/* ---------- receipt screen actions ---------- */
+$('rvClose').addEventListener('click', () => { renderHome(); show('v-home'); });
+$('rvAgain').addEventListener('click', () => {
+  const h = S.habits.find(x => x.id === currentHabitId);
+  if (h) playReveal(h, { short: true });
+});
+$('rvNew').addEventListener('click', () => enterInput(Premium.isActive() ? 'add' : 'replace'));
+$('rvShare').addEventListener('click', () => openShare('single'));
+$('rvStack').addEventListener('click', () => {
+  if (Premium.isActive()) enterInput('add');
+  else openPaywall({ intent: 'stack' });
+});
+$('rvDuel').addEventListener('click', () => {
+  if (!S.habits.length) return;
+  openSheet('sh-duelstart');
+});
+$('duelGo').addEventListener('click', () => {
+  const h = S.habits.find(x => x.id === currentHabitId) || S.habits[0];
+  const c0 = calc(h.cost, h.freq, S.age);
+  duel = {
+    labelA: ($('duelLabelA').value.trim() || 'ME').toUpperCase().slice(0, 10),
+    labelB: ($('duelLabelB').value.trim() || 'THEM').toUpperCase().slice(0, 10),
+    a: { name: h.name, cost: h.cost, freq: h.freq, age: S.age }
+  };
+  closeSheet();
+  enterInput('duel');
+});
+
+/* ============================================================
+   Duel result
+   ============================================================ */
+function duelCalcs() {
+  const ca = calc(duel.a.cost, duel.a.freq, duel.a.age);
+  const cb = calc(duel.b.cost, duel.b.freq, duel.b.age);
+  return { ca, cb };
+}
+let paperViewMode = 'duel'; // v-duel doubles as the audit-receipt viewer
+function renderDuel() {
+  paperViewMode = 'duel';
+  $('duelShare').textContent = 'SHARE THE DUEL';
+  $('duelBack').textContent = 'Back to my receipt';
+  const p = $('duelPaper');
+  p.dataset.rt = activeTheme();
+  p.textContent = '';
+  tear(p);
+  renderModelDOM(duelModel(), p);
+  const { ca, cb } = duelCalcs();
+  announce('Duel receipt. ' + duel.labelA + ' ' + money(ca.lifetime) + ', ' + duel.labelB + ' ' + money(cb.lifetime) + '.');
+}
+$('duelClose').addEventListener('click', backFromDuel);
+$('duelBack').addEventListener('click', backFromDuel);
+function backFromDuel() {
+  const wasAudit = paperViewMode === 'audit';
+  duel = null;
+  syncAgeUI(); // give the slider back to the user after duel mode borrowed it
+  const h = S.habits.find(x => x.id === currentHabitId);
+  if (!wasAudit && h && $('rvPaper').childElementCount) show('v-reveal');
+  else if (S.habits.length) { renderHome(); show('v-home'); }
+  else enterInput('first');
+}
+$('duelShare').addEventListener('click', () => openShare(paperViewMode === 'audit' ? 'audit' : 'duel'));
+
+/* ============================================================
+   Receipt model (shared by DOM + canvas)
+   line types: brand | c {s,small,bold} | kv {k,v,color,big} | dash | rule |
+               hero {label,num,sub} | roast {s} | fine {rows} | bars {seed} |
+               foot {s} | duo {l,r,bold,color,size}
+   ============================================================ */
+function singleModel(h, cAge) {
+  const c = calc(h.cost, h.freq, cAge);
+  const ess = isEssential(h.name);
+  const m = [];
+  m.push({ t: 'brand' });
+  m.push({ t: 'c', s: c.over ? '* 10-YEAR TAB *' : '* LIFETIME RECEIPT *', bold: true });
+  m.push({ t: 'c', s: ess ? 'EVERY DOLLAR COUNTED' : 'OPEN 24 HRS · NO REFUNDS ON TIME', small: true });
+  m.push({ t: 'c', s: dstamp() + ' · CUSTOMER: YOU' });
+  m.push({ t: 'dash' });
+  m.push({ t: 'kv', k: 'ITEM', v: h.name.toUpperCase() });
+  m.push({ t: 'kv', k: 'ONE ROUND', v: moneyC(h.cost) });
+  m.push({ t: 'kv', k: 'FREQ', v: freqR(h.freq) });
+  m.push({ t: 'kv', k: c.over ? 'YEARS ON TAB (NEXT)' : 'YEARS ON TAB', v: String(c.years) });
+  m.push({ t: 'kv', k: 'THIS YEAR', v: money(c.annual) });
+  m.push({ t: 'dash' });
+  m.push({ t: 'kv', k: c.over ? '10-YEAR TAB' : 'LIFETIME TAB', v: money(c.lifetime), color: 'stamp', big: true });
+  if (c.maxed) m.push({ t: 'c', s: 'PRINTER MAXED OUT.', bold: true });
+  m.push({ t: 'rule' });
+  m.push({ t: 'hero', label: c.over ? 'IF INVESTED — 10 YRS' : 'IF YOU’D INVESTED IT', num: money(c.invested), sub: c.horizon });
+  m.push({ t: 'roast', s: roast(c.lifetime, h.name) });
+  m.push({ t: 'fine', rows: DISC });
+  m.push({ t: 'c', s: 'NO REFUNDS ON TIME', small: true });
+  m.push({ t: 'c', s: 'THANK YOU FOR YOUR HABITS', small: true });
+  m.push({ t: 'bars', seed: h.name });
+  m.push({ t: 'foot', s: S.tagOn ? 'THE TAB — RUN YOURS' : 'THE TAB' });
+  return m;
+}
+function auditModel() {
+  const cs = S.habits.map(h => ({ h, c: calc(h.cost, h.freq, S.age) }));
+  const over = cs[0].c.over;
+  const life = cs.reduce((a, x) => a + x.c.lifetime, 0);
+  const inv = cs.reduce((a, x) => a + x.c.invested, 0);
+  const m = [];
+  m.push({ t: 'brand' });
+  m.push({ t: 'c', s: 'FULL LIFE AUDIT', bold: true });
+  m.push({ t: 'c', s: 'EVERYTHING, ITEMIZED', small: true });
+  m.push({ t: 'c', s: dstamp() + ' · CUSTOMER: YOU' });
+  m.push({ t: 'dash' });
+  cs.forEach(({ h, c }) => {
+    m.push({ t: 'kv', k: h.name.toUpperCase().slice(0, 16), v: money(c.lifetime), color: 'stamp' });
+    m.push({ t: 'kv', k: '  ' + moneyC(h.cost) + ' · ' + freqR(h.freq) + ' × ' + c.years + ' YRS', v: '', small: true });
+  });
+  m.push({ t: 'dash' });
+  m.push({ t: 'kv', k: over ? '10-YEAR TAB' : 'LIFETIME TAB', v: money(life), color: 'stamp', big: true });
+  m.push({ t: 'rule' });
+  m.push({ t: 'hero', label: over ? 'IF INVESTED — 10 YRS' : 'IF YOU’D INVESTED IT', num: money(inv), sub: cs[0].c.horizon });
+  m.push({ t: 'roast', s: roast(life, null) });
+  m.push({ t: 'fine', rows: DISC });
+  m.push({ t: 'c', s: 'NO REFUNDS ON TIME', small: true });
+  m.push({ t: 'c', s: 'THANK YOU FOR YOUR HABITS', small: true });
+  m.push({ t: 'bars', seed: S.habits.map(h => h.name).join('') });
+  m.push({ t: 'foot', s: S.tagOn ? 'THE TAB — RUN YOURS' : 'THE TAB' });
+  return m;
+}
+function duelModel() {
+  const { ca, cb } = duelCalcs();
+  const gapLife = Math.abs(ca.lifetime - cb.lifetime);
+  const gapInv = Math.abs(ca.invested - cb.invested);
+  const winner = ca.lifetime === cb.lifetime ? null : (ca.lifetime > cb.lifetime ? duel.labelA : duel.labelB);
+  const m = [];
+  m.push({ t: 'brand' });
+  m.push({ t: 'c', s: '* TAB DUEL *', bold: true });
+  m.push({ t: 'c', s: 'TWO TABS · ONE RECEIPT', small: true });
+  m.push({ t: 'c', s: dstamp() });
+  m.push({ t: 'dash' });
+  m.push({ t: 'duo', l: duel.labelA, r: duel.labelB, bold: true });
+  m.push({ t: 'duo', l: duel.a.name.toUpperCase(), r: duel.b.name.toUpperCase(), size: 'small' });
+  m.push({ t: 'duo', l: moneyC(duel.a.cost) + ' ' + freqR(duel.a.freq), r: moneyC(duel.b.cost) + ' ' + freqR(duel.b.freq), size: 'small' });
+  m.push({ t: 'duo', l: money(ca.lifetime), r: money(cb.lifetime), bold: true, color: 'stamp' });
+  m.push({ t: 'duo', l: money(ca.invested), r: money(cb.invested), color: 'flip' });
+  m.push({ t: 'c', s: 'INVESTED-BY-65 LINE IN ' + (THEMES[activeTheme()].name === 'Top Shelf' ? 'GOLD' : 'GREEN'), small: true, skip: true });
+  m.pop(); // (kept simple: no legend line)
+  m.push({ t: 'dash' });
+  m.push({ t: 'c', s: 'THE VERDICT', small: true });
+  m.push({ t: 'c', s: winner ? (winner + ' RUNS THE BIGGER TAB') : 'DEAD EVEN. SPLIT THE CHECK.', bold: true });
+  m.push({ t: 'kv', k: 'THE GAP', v: money(gapLife), color: 'stamp' });
+  m.push({ t: 'rule' });
+  m.push({ t: 'hero', label: 'THE GAP — INVESTED', num: money(gapInv), sub: duel.a.age === duel.b.age ? cb.horizon : 'each side invested to their own 65' });
+  m.push({ t: 'roast', s: 'LOSER BUYS THE COFFEE.' });
+  m.push({ t: 'fine', rows: DISC });
+  m.push({ t: 'bars', seed: duel.a.name + duel.b.name });
+  m.push({ t: 'foot', s: S.tagOn ? 'THE TAB — RUN YOURS' : 'THE TAB' });
+  return m;
+}
+function renderModelDOM(model, paper) {
+  model.forEach(L => {
+    switch (L.t) {
+      case 'brand': paper.appendChild(el('div', 'rbrand', 'THE TAB')); break;
+      case 'c': paper.appendChild(el('div', 'rc' + (L.small ? ' small' : '') + (L.bold ? ' b' : ''), L.s)); break;
+      case 'dash': paper.appendChild(el('hr', 'rdash')); break;
+      case 'rule': paper.appendChild(el('hr', 'rrule')); break;
+      case 'kv': {
+        const row = el('div', 'rkv' + (L.big ? ' bigrow' : ''));
+        const k = el('span', 'k', L.k); if (L.small) { k.style.fontSize = '10px'; k.style.opacity = '.62'; }
+        row.appendChild(k);
+        const v = el('span', 'v num', L.v);
+        if (L.color === 'stamp') v.classList.add('rs-col');
+        if (L.color === 'flip') v.classList.add('rf-col');
+        row.appendChild(v);
+        paper.appendChild(row); break;
+      }
+      case 'hero': {
+        const st = el('div', 'rstamp');
+        st.appendChild(el('div', 'sl', L.label));
+        st.appendChild(el('div', 'sn ' + sizeClassFor(L.num), L.num));
+        st.appendChild(el('div', 'ss', L.sub));
+        st.style.cursor = 'pointer';
+        st.addEventListener('click', openExplain);
+        paper.appendChild(st); break;
+      }
+      case 'roast': paper.appendChild(el('div', 'rroast', L.s)); break;
+      case 'fine': { const f = el('div', 'rfine'); f.innerHTML = L.rows.join('<br>'); f.style.cursor = 'pointer'; f.addEventListener('click', openExplain); paper.appendChild(f); break; }
+      case 'bars': paper.appendChild(barcodeDOM(L.seed)); break;
+      case 'foot': paper.appendChild(el('div', 'rfoot', L.s)); break;
+      case 'duo': {
+        const row = el('div', 'rduo' + (L.bold ? ' b' : ''));
+        const a = el('div', null, L.l), b = el('div', null, L.r);
+        if (L.size === 'small') { row.style.fontSize = '10px'; row.style.opacity = '.75'; }
+        if (L.color === 'stamp') { a.className = b.className = 'rs-col'; }
+        if (L.color === 'flip') { a.className = b.className = 'rf-col'; }
+        row.appendChild(a); row.appendChild(b);
+        paper.appendChild(row); break;
+      }
+    }
+  });
+}
+
+/* ============================================================
+   Canvas export — the ad
+   ============================================================ */
+function drawCard(cnv, model, themeKey, aspect) {
+  const T = THEMES[themeKey];
+  const W = 1080, H = aspect === '916' ? 1920 : 1350;
+  cnv.width = W; cnv.height = H;
+  const ctx = cnv.getContext('2d');
+  const MONO = (w, px) => w + ' ' + px + 'px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+
+  // glass-world backdrop
+  const g = ctx.createLinearGradient(0, 0, W * 0.9, H);
+  g.addColorStop(0, '#12161F'); g.addColorStop(0.55, '#0C0E12'); g.addColorStop(1, '#171410');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const glow = ctx.createRadialGradient(W / 2, H * 0.42, 60, W / 2, H * 0.42, H * 0.62);
+  glow.addColorStop(0, 'rgba(255,236,205,0.07)'); glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  ctx.translate(W / 2, H / 2); ctx.rotate(-0.5);
+  const streak = ctx.createLinearGradient(0, -H, 0, H);
+  streak.addColorStop(0.42, 'rgba(255,255,255,0)');
+  streak.addColorStop(0.5, 'rgba(255,255,255,0.045)');
+  streak.addColorStop(0.58, 'rgba(255,255,255,0)');
+  ctx.fillStyle = streak; ctx.fillRect(-W, -H, W * 2, H * 2);
+  ctx.restore();
+
+  // layout pass
+  let paperW = Math.round(W * (aspect === '916' ? 0.70 : 0.78));
+  let s = paperW / 320;
+  const PAD = 18;
+  function measure(sc) {
+    let y = 24 * sc;
+    for (const L of model) {
+      switch (L.t) {
+        case 'brand': y += 30 * sc; break;
+        case 'c': y += (L.small ? 16 : 18) * sc; break;
+        case 'dash': case 'rule': y += 20 * sc; break;
+        case 'kv': y += (L.big ? 34 : 24) * sc; break;
+        case 'duo': y += 22 * sc; break;
+        case 'hero': y += 118 * sc; break;
+        case 'roast': y += 30 * sc; break;
+        case 'fine': y += (L.rows.length * 15 + 10) * sc; break;
+        case 'bars': y += 46 * sc; break;
+        case 'foot': y += 20 * sc; break;
+      }
+    }
+    return y + 26 * sc;
+  }
+  let paperH = measure(s);
+  const maxH = H * 0.88;
+  if (paperH > maxH) { const k = Math.max(0.62, maxH / paperH); paperW = Math.round(paperW * k); s = paperW / 320; paperH = measure(s); }
+  const px0 = (W - paperW) / 2;
+  const py0 = Math.max(H * 0.05, (H - paperH) / 2);
+
+  // paper with zigzag tears
+  const tooth = 9 * s, teeth = Math.ceil(paperW / (tooth * 2));
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 24;
+  ctx.beginPath();
+  ctx.moveTo(px0, py0 + tooth);
+  for (let i = 0; i < teeth; i++) {
+    ctx.lineTo(px0 + (i * 2 + 1) * tooth, py0);
+    ctx.lineTo(px0 + (i * 2 + 2) * tooth, py0 + tooth);
+  }
+  ctx.lineTo(px0 + paperW, py0 + paperH - tooth);
+  for (let i = teeth; i > 0; i--) {
+    ctx.lineTo(px0 + (i * 2 - 1) * tooth, py0 + paperH);
+    ctx.lineTo(px0 + (i * 2 - 2) * tooth, py0 + paperH - tooth);
+  }
+  ctx.closePath();
+  ctx.fillStyle = T.paper; ctx.fill();
+  ctx.restore();
+
+  // thermal banding
+  ctx.save(); ctx.globalAlpha = 0.03;
+  ctx.fillStyle = (themeKey === 'carbon' || themeKey === 'topshelf') ? '#FFFFFF' : '#000000';
+  for (let y = py0; y < py0 + paperH; y += 4 * s) ctx.fillRect(px0, y, paperW, 1.2 * s);
+  ctx.restore();
+
+  // content
+  const left = px0 + PAD * s, right = px0 + paperW - PAD * s, cx = px0 + paperW / 2;
+  const ink = T.ink;
+  let y = py0 + 24 * s + 14 * s;
+  const alpha = (a, fn) => { ctx.save(); ctx.globalAlpha = a; fn(); ctx.restore(); };
+  function fitText(str, font, maxW) {
+    ctx.font = font;
+    let out = str;
+    while (out.length > 2 && ctx.measureText(out).width > maxW) out = out.slice(0, -2) + '…';
+    return out;
+  }
+  for (const L of model) {
+    switch (L.t) {
+      case 'brand': {
+        ctx.font = MONO('800', Math.round(20 * s));
+        ctx.fillStyle = ink; ctx.textAlign = 'center';
+        ctx.save(); const sp = 0.25 * 20 * s;
+        // letterspaced brand
+        const str = 'THE TAB'; let tw = 0;
+        const widths = [...str].map(ch => ctx.measureText(ch).width + sp); tw = widths.reduce((a, b) => a + b, 0) - sp;
+        let x = cx - tw / 2;
+        [...str].forEach((ch, i) => { ctx.textAlign = 'left'; ctx.fillText(ch, x, y); x += widths[i]; });
+        ctx.restore(); ctx.textAlign = 'center';
+        y += 30 * s; break;
+      }
+      case 'c': {
+        ctx.font = MONO(L.bold ? '700' : '400', Math.round((L.small ? 10 : 11) * s));
+        ctx.fillStyle = ink; ctx.textAlign = 'center';
+        if (L.small) alpha(0.62, () => ctx.fillText(L.s, cx, y)); else ctx.fillText(L.s, cx, y);
+        y += (L.small ? 16 : 18) * s; break;
+      }
+      case 'dash': {
+        y += 4 * s;
+        ctx.save(); ctx.strokeStyle = ink; ctx.globalAlpha = 0.38; ctx.lineWidth = 2 * s;
+        ctx.setLineDash([6 * s, 5 * s]);
+        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
+        ctx.restore(); y += 16 * s; break;
+      }
+      case 'rule': {
+        y += 4 * s;
+        ctx.save(); ctx.strokeStyle = ink; ctx.lineWidth = 2.5 * s;
+        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
+        ctx.restore(); y += 16 * s; break;
+      }
+      case 'kv': {
+        if (L.big) y += 9 * s;
+        const kf = MONO(L.big ? '700' : (L.small ? '400' : '500'), Math.round((L.big ? 11 : L.small ? 10 : 13) * s));
+        const vf = MONO(L.big ? '800' : '600', Math.round((L.big ? 26 : 13) * s));
+        ctx.textAlign = 'left'; ctx.font = kf; ctx.fillStyle = ink;
+        if (L.small) alpha(0.62, () => ctx.fillText(L.k, left, y)); else ctx.fillText(L.k, left, y);
+        ctx.textAlign = 'right'; ctx.font = vf;
+        ctx.fillStyle = L.color === 'stamp' ? T.stamp : L.color === 'flip' ? T.flip : ink;
+        ctx.fillText(fitText(L.v, vf, paperW - PAD * 2 * s - (L.big ? 90 : 110) * s - 8 * s), right, y + (L.big ? 4 * s : 0));
+        ctx.textAlign = 'center';
+        y += (L.big ? 25 : 24) * s; break;
+      }
+      case 'duo': {
+        const f = MONO(L.bold ? '700' : '500', Math.round((L.size === 'small' ? 10 : 12) * s));
+        ctx.font = f;
+        ctx.fillStyle = L.color === 'stamp' ? T.stamp : L.color === 'flip' ? T.flip : ink;
+        const half = (paperW - PAD * 2 * s) / 2 - 8 * s;
+        ctx.textAlign = 'left';
+        const lt = fitText(L.l, f, half);
+        if (L.size === 'small') alpha(0.7, () => ctx.fillText(lt, left, y)); else ctx.fillText(lt, left, y);
+        ctx.textAlign = 'right';
+        const rt = fitText(L.r, f, half);
+        if (L.size === 'small') alpha(0.7, () => ctx.fillText(rt, right, y)); else ctx.fillText(rt, right, y);
+        ctx.textAlign = 'center';
+        y += 22 * s; break;
+      }
+      case 'hero': {
+        const bx = left + 4 * s, bw = paperW - PAD * 2 * s - 8 * s, bh = 104 * s;
+        ctx.save();
+        ctx.translate(cx, y + bh / 2 - 6 * s); ctx.rotate(-0.035);
+        ctx.strokeStyle = T.flip; ctx.globalAlpha = 0.85; ctx.lineWidth = 2.2 * s;
+        rr(ctx, -bw / 2, -bh / 2, bw, bh, 10 * s); ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = T.flip; ctx.textAlign = 'center';
+        let lf = Math.round(12 * s);
+        const lbl = spaceOut(L.label);
+        ctx.font = MONO('700', lf);
+        while (lf > 7 * s && ctx.measureText(lbl).width > bw - 26 * s) { lf -= 1; ctx.font = MONO('700', lf); }
+        ctx.fillText(lbl, 0, -bh / 2 + 24 * s);
+        const numSize = L.num.length > 12 ? 30 : L.num.length > 9 ? 38 : 46;
+        ctx.font = MONO('800', Math.round(numSize * s));
+        ctx.fillText(L.num, 0, 10 * s);
+        if (themeKey === 'topshelf') {
+          const nw = ctx.measureText(L.num).width;
+          ctx.lineWidth = 1.4 * s;
+          ctx.beginPath(); ctx.moveTo(-nw / 2, 18 * s); ctx.lineTo(nw / 2, 18 * s); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(-nw / 2, 22 * s); ctx.lineTo(nw / 2, 22 * s); ctx.stroke();
+        }
+        ctx.fillStyle = ink;
+        ctx.font = MONO('700', Math.round(11 * s));
+        ctx.fillText(spaceOut(L.sub), 0, bh / 2 - 14 * s);
+        ctx.restore();
+        y += 118 * s; break;
+      }
+      case 'roast': {
+        ctx.font = MONO('500', Math.round(10 * s)); ctx.fillStyle = ink; ctx.textAlign = 'center';
+        alpha(0.62, () => ctx.fillText(fitText(L.s, ctx.font, paperW - PAD * 2 * s), cx, y + 6 * s));
+        y += 30 * s; break;
+      }
+      case 'fine': {
+        ctx.font = MONO('400', Math.round(9.5 * s)); ctx.fillStyle = ink; ctx.textAlign = 'center';
+        L.rows.forEach((r, i) => alpha(0.62, () => ctx.fillText(r, cx, y + i * 15 * s)));
+        y += (L.rows.length * 15 + 10) * s; break;
+      }
+      case 'bars': {
+        const units = barcodeUnits(L.seed);
+        const total = units.reduce((a, b) => a + b, 0);
+        const bw = 210 * s; let x = cx - bw / 2;
+        ctx.fillStyle = ink;
+        units.forEach((u, i) => {
+          const w = u / total * bw;
+          if (i % 2 === 0) ctx.fillRect(x, y, w, 32 * s);
+          x += w;
+        });
+        y += 46 * s; break;
+      }
+      case 'foot': {
+        ctx.font = MONO('700', Math.round(10 * s)); ctx.fillStyle = ink; ctx.textAlign = 'center';
+        ctx.fillText(spaceOut(L.s), cx, y + 4 * s);
+        y += 20 * s; break;
+      }
+    }
+  }
+  function spaceOut(str) { return str.split('').join(' '); }
+}
+function rr(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/* ---------- share sheet ---------- */
+let shareKind = 'single';
+function currentModel() {
+  if (shareKind === 'duel' && duel && duel.b) return duelModel();
+  if (shareKind === 'audit') return auditModel();
+  const h = S.habits.find(x => x.id === currentHabitId) || S.habits[0];
+  return singleModel(h, S.age);
+}
+function openShare(kind) {
+  shareKind = kind;
+  renderThemeRow($('themeRow'), true);
+  syncAspect();
+  $('tagT').classList.toggle('on', S.tagOn);
+  $('tagT').setAttribute('aria-checked', String(S.tagOn));
+  renderPreview();
+  openSheet('sh-share');
+}
+function syncAspect() {
+  $('aspectSeg').querySelectorAll('button').forEach(b => b.classList.toggle('sel', b.dataset.a === S.aspect));
+}
+$('aspectSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+  S.aspect = b.dataset.a; save(); syncAspect(); renderPreview();
+}));
+$('tagT').addEventListener('click', () => {
+  S.tagOn = !S.tagOn; save();
+  $('tagT').classList.toggle('on', S.tagOn);
+  $('tagT').setAttribute('aria-checked', String(S.tagOn));
+  renderPreview();
+});
+function renderPreview() {
+  drawCard($('shCanvas'), currentModel(), activeTheme(), S.aspect);
+}
+function renderThemeRow(mount, forShare) {
+  mount.textContent = '';
+  Object.keys(THEMES).forEach(key => {
+    const T = THEMES[key];
+    const locked = !T.free && !Premium.isActive();
+    const b = el('button', 'swatch');
+    b.style.background = T.paper;
+    b.setAttribute('aria-label', T.name + (locked ? ', House Account' : ''));
+    const bar1 = el('div'); bar1.style.cssText = 'height:7px;margin:9px 9px 0;background:' + T.ink + ';opacity:.85';
+    const bar2 = el('div'); bar2.style.cssText = 'height:5px;margin:5px 12px 0;background:' + T.stamp;
+    const bar3 = el('div'); bar3.style.cssText = 'height:9px;margin:7px 7px 0;background:' + T.flip;
+    b.appendChild(bar1); b.appendChild(bar2); b.appendChild(bar3);
+    if (locked) {
+      const lo = el('div', 'lockover');
+      lo.innerHTML = '<svg class="locksvg" style="color:#fff;width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+      b.appendChild(lo);
+    }
+    if (S.theme === key) b.classList.add('sel');
+    b.appendChild(el('span', 'sw-name', T.name));
+    b.addEventListener('click', () => {
+      if (locked) { openPaywall({ intent: 'theme', key, from: forShare ? 'share' : 'settings' }); return; }
+      S.theme = key; save();
+      renderThemeRow($('themeRow'), true);
+      renderThemeRow($('themeRow2'));
+      document.querySelectorAll('.paper').forEach(p => { if (p.dataset.rt != null) p.dataset.rt = activeTheme(); });
+      if (openSheetId === 'sh-share') renderPreview();
+    });
+    mount.appendChild(b);
+  });
+}
+async function exportBlob() {
+  const cnv = document.createElement('canvas');
+  drawCard(cnv, currentModel(), activeTheme(), S.aspect);
+  return new Promise(res => cnv.toBlob(res, 'image/png'));
+}
+function shareCaption() {
+  if (shareKind === 'duel' && duel) {
+    const { ca, cb } = duelCalcs();
+    return 'tab duel: ' + money(ca.lifetime) + ' vs ' + money(cb.lifetime) + '. run yours — The Tab';
+  }
+  if (shareKind === 'audit' && S.habits.length) {
+    const cs = S.habits.map(h => calc(h.cost, h.freq, S.age));
+    const life = cs.reduce((a, c) => a + c.lifetime, 0);
+    const inv = cs.reduce((a, c) => a + c.invested, 0);
+    return 'my whole tab is ' + money(life) + '. could’ve been ' + money(inv) + (cs[0].over ? ' in 10 years' : ' by 65') + '. run yours — The Tab';
+  }
+  const h = S.habits.find(x => x.id === currentHabitId) || S.habits[0];
+  if (!h) return 'run your tab — The Tab';
+  const c = calc(h.cost, h.freq, S.age);
+  return 'my ' + h.name + ' tab is ' + money(c.lifetime) + '. could’ve been ' + money(c.invested) + (c.over ? ' in 10 years' : ' by 65') + '. run yours — The Tab';
+}
+function downloadBlob(blob) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'the-tab-receipt.png';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+function afterShareSuccess() {
+  S.sharedOnce = true; save();
+  toast('Receipt printed.');
+  maybeShowBanner(true);
+}
+$('doShare').addEventListener('click', async () => {
+  const blob = await exportBlob();
+  const file = new File([blob], 'the-tab-receipt.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], text: shareCaption() });
+      afterShareSuccess();
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+      downloadBlob(blob); afterShareSuccess();
+    }
+  } else {
+    downloadBlob(blob); afterShareSuccess();
+  }
+});
+$('doSave').addEventListener('click', async () => {
+  downloadBlob(await exportBlob());
+  afterShareSuccess();
+});
+
+/* ============================================================
+   Paywall — House Account
+   ============================================================ */
+const PAY_ROWS = [
+  ['UNLIMITED STACKED HABITS', 'INCLUDED'],
+  ['COMBINED AUDIT RECEIPT', 'INCLUDED'],
+  ['SKIP STREAK + WEALTH GRAPH', 'INCLUDED'],
+  ['3 PREMIUM RECEIPT THEMES', 'INCLUDED'],
+  ['SUBSCRIPTION FEES', '$0.00 FOREVER']
+];
+let payIntent = null; // what the user was trying to do when the paywall opened
+function renderPaywall() {
+  const p = $('payPaper');
+  p.dataset.rt = 'thermal';
+  p.textContent = '';
+  tear(p);
+  p.appendChild(el('div', 'rbrand', 'THE TAB'));
+  if (Premium.isActive()) {
+    // Settled state — never re-sell to a paid customer.
+    $('payTitle').textContent = 'The House Account is open.';
+    $('paySub').textContent = 'Paid once. Yours for good.';
+    p.appendChild(el('div', 'rc b', 'HOUSE ACCOUNT — OPEN'));
+    const dt = new Date((S.premium && S.premium.unlockedAt) || Date.now());
+    p.appendChild(el('div', 'rc small', 'OPENED ' + (dt.getMonth() + 1) + '/' + dt.getDate() + '/' + dt.getFullYear()));
+    p.appendChild(el('hr', 'rdash'));
+    PAY_ROWS.forEach(([l, r]) => {
+      const row = el('div', 'rkv');
+      row.style.fontSize = '11px';
+      row.appendChild(el('span', 'k', l));
+      row.appendChild(el('span', 'fill'));
+      row.appendChild(el('span', 'v num', r));
+      p.appendChild(row);
+    });
+    p.appendChild(el('hr', 'rdash'));
+    const st = el('div', 'rstamp');
+    st.appendChild(el('div', 'sl', 'BALANCE DUE'));
+    st.appendChild(el('div', 'sn mid', '$0.00'));
+    st.appendChild(el('div', 'ss', 'PAID IN FULL'));
+    p.appendChild(st);
+    p.appendChild(el('div', 'rc small', 'NOTHING MORE TO BUY. EVER.'));
+    $('payCta').textContent = 'CLOSE THE LEDGER';
+    return;
+  }
+  $('payTitle').textContent = 'One habit runs free. The whole tab is one payment.';
+  $('paySub').textContent = 'A subscription would be ironic.';
+  p.appendChild(el('div', 'rc b', 'THE FULL LIFE AUDIT'));
+  p.appendChild(el('div', 'rc', dstamp()));
+  p.appendChild(el('hr', 'rdash'));
+  PAY_ROWS.forEach(([l, r]) => {
+    const row = el('div', 'rkv');
+    row.style.fontSize = '11px';
+    row.appendChild(el('span', 'k', l));
+    row.appendChild(el('span', 'fill'));
+    row.appendChild(el('span', 'v num', r));
+    p.appendChild(row);
+  });
+  p.appendChild(el('hr', 'rdash'));
+  const tot = el('div', 'rkv bigrow');
+  tot.appendChild(el('span', 'k', 'TOTAL'));
+  const tv = el('span', 'v num rs-col', '$14.99'); tot.appendChild(tv);
+  p.appendChild(tot);
+  p.appendChild(el('div', 'rc b', 'CHARGED ONCE. EVER.'));
+  if (!PAYMENTS.keysPresent) {
+    const ea = el('div', 'rkv');
+    ea.appendChild(el('span', 'k', 'EARLY ACCESS'));
+    ea.appendChild(el('span', 'v num rf-col', '$0.00'));
+    p.appendChild(ea);
+  }
+  // honest anchor from real inputs only
+  const h = S.habits[0];
+  if (h && S.age != null) {
+    const c = calc(h.cost, h.freq, S.age);
+    if (c.annual / 12 >= 14.99) {
+      const days = 14.99 / (c.annual / 365);
+      p.appendChild(el('div', 'rfine', 'FOR SCALE: YOUR ' + h.name.toUpperCase().slice(0, 14) + ' TAB RINGS UP $14.99 EVERY ' + days.toFixed(1) + ' DAYS.'));
+    }
+  }
+  p.appendChild(el('hr', 'rdash'));
+  p.appendChild(el('div', 'rc small', 'PAY ONCE. A SUBSCRIPTION WOULD BE IRONIC.'));
+  $('payCta').textContent = PAYMENTS.keysPresent ? 'SETTLE UP — $14.99. ONCE.' : 'FREE DURING EARLY ACCESS — OPEN IT';
+}
+function openPaywall(intent) {
+  payIntent = intent || null;
+  renderPaywall();
+  openSheet('sh-pay');
+}
+$('payCta').addEventListener('click', () => {
+  if (Premium.isActive()) { closeSheet(); return; }
+  // Stub mode: grants the unlock, never renders payment UI, never claims a charge.
+  closeSheet();
+  unlockPremium(); // premiumchange handler completes the recorded intent
+  toast('House Account open. Everything’s on.');
+});
+$('payRestore').addEventListener('click', () => {
+  // Stub: re-read local storage (covers same-device reinstall). Store restore arrives with real receipts.
+  try {
+    const raw = localStorage.getItem(LS);
+    const st = raw ? JSON.parse(raw) : null;
+    if (st && st.premium) {
+      S.premium = st.premium; save();
+      closeSheet();
+      window.dispatchEvent(new Event('premiumchange'));
+      toast('House Account open. Everything’s on.');
+    } else toast('No purchase on this phone yet.');
+  } catch (e) { toast('No purchase on this phone yet.'); }
+});
+window.addEventListener('premiumchange', () => {
+  renderHome();
+  renderThemeRow($('themeRow2'));
+  $('premState').textContent = Premium.isActive() ? 'Open' : 'Closed';
+  const h = S.habits.find(x => x.id === currentHabitId);
+  if (h && $('v-reveal').classList.contains('active')) {
+    $('rvStack').innerHTML = Premium.isActive()
+      ? '+ Stack another habit'
+      : '<svg class="locksvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Stack another habit';
+  }
+  // finish what the user was doing when the paywall interrupted them
+  const intent = payIntent; payIntent = null;
+  if (!Premium.isActive() || !intent) return;
+  if (intent.intent === 'theme' && THEMES[intent.key]) {
+    S.theme = intent.key; save();
+    renderThemeRow($('themeRow2'));
+    document.querySelectorAll('.paper').forEach(p => { if (p.dataset.rt != null && p.id !== 'payPaper') p.dataset.rt = activeTheme(); });
+    if (intent.from === 'share') openShare(shareKind);
+    else openSettings();
+  } else if (intent.intent === 'stack') {
+    enterInput('add');
+  } else if (intent.intent === 'swap-add' && intent.snap) {
+    const nh = mkHabit(intent.snap);
+    S.habits.push(nh); currentHabitId = nh.id; save();
+    renderHome();
+    playReveal(nh);
+  }
+});
+
+/* ============================================================
+   S4 — home / audit
+   ============================================================ */
+function streakDays() {
+  const days = new Set();
+  S.habits.forEach(h => Object.keys(h.skips || {}).forEach(d => { if (h.skips[d] > 0) days.add(d); }));
+  if (!days.size) return 0;
+  let n = 0;
+  const d = new Date();
+  const key = dt => dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+  if (!days.has(key(d))) d.setDate(d.getDate() - 1); // streak survives until midnight
+  while (days.has(key(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function bankedTotal() { return S.habits.reduce((a, h) => a + (h.banked || 0), 0); }
+
+function renderHome() {
+  if (!S.habits.length) return;
+  const prem = Premium.isActive();
+  const totals = $('homeTotals');
+  const cs = S.habits.map(h => ({ h, c: calc(h.cost, h.freq, S.age) }));
+  const life = cs.reduce((a, x) => a + x.c.lifetime, 0);
+  const inv = cs.reduce((a, x) => a + x.c.invested, 0);
+  const over = cs[0].c.over;
+  totals.innerHTML =
+    '<div class="tl"><span class="tlab">' + (S.habits.length > 1 ? 'ALL HABITS · TAB' : (over ? '10-YEAR TAB' : 'LIFETIME TAB')) + '</span>' +
+    '<span class="tnum red num">' + money(life) + '</span></div>' +
+    '<div class="tl" style="margin-top:6px"><span class="tlab">IF INVESTED</span>' +
+    '<span class="tnum grn num">' + money(inv) + '</span></div>' +
+    '<div class="test">' + (S.habits.length > 1 ? 'Tap for the Full Life Audit receipt. ' : 'Tap to reprint the receipt. ') + 'Estimates · how the math works</div>';
+
+  // stubs
+  const stubs = $('stubs');
+  stubs.textContent = '';
+  S.habits.forEach(h => {
+    const c = calc(h.cost, h.freq, S.age);
+    const stubWrap = el('div', 'stub paperwrap');
+    const p = el('div', 'paper');
+    p.dataset.rt = activeTheme();
+    tear(p);
+    p.appendChild(el('div', 'sname', h.name.toUpperCase()));
+    p.appendChild(el('div', 'smeta num', moneyC(h.cost) + ' · ' + freqR(h.freq)));
+    const nums = el('div', 'snums');
+    const n1 = el('span', 'rs-col'); n1.innerHTML = '<span class="lab">TAB </span>' + money(c.lifetime);
+    const n2 = el('span', 'rf-col'); n2.innerHTML = '<span class="lab">INV </span>' + money(c.invested);
+    nums.appendChild(n1); nums.appendChild(n2);
+    p.appendChild(nums);
+    const kept = el('div', 'skept num');
+    const sd = streakDays();
+    kept.textContent = (h.banked > 0 ? money(h.banked) + ' stayed yours.' : 'Nothing skipped yet.') + (prem && sd > 0 && h.banked > 0 ? ' · Day ' + sd : '');
+    p.appendChild(kept);
+    const row = el('div', 'srow');
+    const skip = el('button', 'skipbtn', 'SKIPPED IT TODAY');
+    skip.addEventListener('click', () => doSkip(h));
+    row.appendChild(skip);
+    const comp = el('button', 'compbtn', 'comp it');
+    comp.addEventListener('click', () => {
+      confirmSheet('Take ' + h.name + ' off the tab? The math forgets. You won’t.', 'Take it off', 'Keep it', () => {
+        S.habits = S.habits.filter(x => x.id !== h.id);
+        if (currentHabitId === h.id) { currentHabitId = null; $('rvPaper').textContent = ''; }
+        save();
+        if (!S.habits.length) enterInput('first'); else renderHome();
+      });
+    });
+    row.appendChild(comp);
+    p.appendChild(row);
+    const open = el('button', 'openbtn');
+    open.setAttribute('aria-label', 'Open ' + h.name + ' receipt');
+    open.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>';
+    open.addEventListener('click', () => { currentHabitId = h.id; playReveal(h, { short: true }); });
+    p.appendChild(open); // inside .paper so var(--ri) resolves against the paper ink
+    stubWrap.appendChild(p);
+    stubs.appendChild(stubWrap);
+  });
+
+  $('ghostStub').hidden = prem;
+
+  // graph section
+  const gs = $('graphSection');
+  gs.textContent = '';
+  const banked = bankedTotal();
+  const card = el('div', 'graphcard glass');
+  card.appendChild(el('h3', null, 'Money that stayed'));
+  if (prem) {
+    if (banked > 0) {
+      const years = cs[0].c.over ? 10 : Math.max(1, 65 - S.age);
+      const proj = banked * Math.pow(1.07, years);
+      card.appendChild(mkGraph(banked, years));
+      const gp = el('div', 'gproj');
+      gp.innerHTML = 'Kept up to ' + (cs[0].c.over ? 'age ' + (S.age + 10) : '65') + ', this pile is <b>' + money(proj) + '</b>.';
+      card.appendChild(gp);
+      const fine = el('div', null, 'Assumes ~7% a year — an estimate, not financial advice.');
+      fine.style.cssText = 'font-size:11px;color:var(--ink3);margin-top:8px';
+      card.appendChild(fine);
+    } else {
+      const empt = el('div', 'gproj', 'Skip a round and the graph starts. The tab is patient.');
+      card.appendChild(empt);
+    }
+  } else {
+    const lock = el('button', 'lockline', '');
+    lock.innerHTML = '<svg class="locksvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Skip streaks and the projected-wealth graph live on the House Account.</span>';
+    lock.style.textAlign = 'left';
+    lock.addEventListener('click', () => openPaywall());
+    card.appendChild(lock);
+  }
+  gs.appendChild(card);
+  $('premState').textContent = prem ? 'Open' : 'Closed';
+}
+function mkGraph(banked, years) {
+  const W = 320, H = 130, PADL = 6, PADB = 18;
+  const maxV = banked * Math.pow(1.07, years);
+  const pts = [];
+  for (let t = 0; t <= years; t++) {
+    const v = banked * Math.pow(1.07, t);
+    const x = PADL + t / years * (W - PADL * 2);
+    const yy = (H - PADB) - (v / maxV) * (H - PADB - 12);
+    pts.push([x, yy]);
+  }
+  const line = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const area = line + ' ' + (W - PADL) + ',' + (H - PADB) + ' ' + PADL + ',' + (H - PADB);
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('class', 'chart');
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.setAttribute('aria-label', 'Projected growth of skipped-spending money');
+  const poly = document.createElementNS(svgNS, 'polygon');
+  poly.setAttribute('points', area);
+  poly.setAttribute('fill', 'rgba(78,217,155,0.14)');
+  const pl = document.createElementNS(svgNS, 'polyline');
+  pl.setAttribute('points', line);
+  pl.setAttribute('fill', 'none');
+  pl.setAttribute('stroke', 'var(--green)');
+  pl.setAttribute('stroke-width', '2.5');
+  pl.setAttribute('stroke-linecap', 'round');
+  const t0 = document.createElementNS(svgNS, 'text');
+  t0.setAttribute('x', PADL); t0.setAttribute('y', H - 4);
+  t0.setAttribute('fill', 'var(--ink3)'); t0.setAttribute('font-size', '10');
+  t0.textContent = 'now · ' + money(banked);
+  const t1 = document.createElementNS(svgNS, 'text');
+  t1.setAttribute('x', W - PADL); t1.setAttribute('y', H - 4);
+  t1.setAttribute('fill', 'var(--ink3)'); t1.setAttribute('font-size', '10'); t1.setAttribute('text-anchor', 'end');
+  t1.textContent = '+' + years + ' yrs';
+  svg.appendChild(poly); svg.appendChild(pl); svg.appendChild(t0); svg.appendChild(t1);
+  return svg;
+}
+function skipCapInfo(h) {
+  // Cap skips over the habit's natural period so you can never bank more than you'd have spent.
+  const py = perYear(h.freq);
+  if (py >= 365) return { window: 1, cap: Math.max(1, Math.ceil(py / 365)), word: 'today' };
+  if (py >= 52) return { window: 7, cap: Math.max(1, Math.round(py / 52)), word: 'this week' };
+  return { window: 30, cap: Math.max(1, Math.round(py / 12)), word: 'this month' };
+}
+function skipsInWindow(h, days) {
+  let n = 0;
+  const d = new Date();
+  for (let i = 0; i < days; i++) {
+    const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    n += (h.skips && h.skips[k]) || 0;
+    d.setDate(d.getDate() - 1);
+  }
+  return n;
+}
+function doSkip(h) {
+  const { window: win, cap, word } = skipCapInfo(h);
+  const today = todayKey();
+  h.skips = h.skips || {};
+  if (skipsInWindow(h, win) >= cap) { toast('Every round ' + word + ' is already skipped. The register is impressed.'); return; }
+  const firstEver = !Object.keys(h.skips).length && !(h.banked > 0);
+  h.skips[today] = (h.skips[today] || 0) + 1;
+  h.banked = (h.banked || 0) + h.cost;
+  save(); vib(10);
+  renderHome();
+  toast(firstEver ? 'First skip on record. ' + moneyC(h.cost) + ' stayed yours.' : moneyC(h.cost) + ' stayed yours.', 'Undo', () => {
+    h.skips[today] = Math.max(0, (h.skips[today] || 0) - 1);
+    if (!h.skips[today]) delete h.skips[today];
+    h.banked = Math.max(0, h.banked - h.cost);
+    save(); renderHome();
+  });
+}
+$('homeTotals').addEventListener('click', () => {
+  if (S.habits.length > 1 && Premium.isActive()) {
+    // full audit receipt in the duel view container (re-used as a static paper viewer)
+    paperViewMode = 'audit';
+    const p = $('duelPaper');
+    p.dataset.rt = activeTheme();
+    p.textContent = '';
+    tear(p);
+    renderModelDOM(auditModel(), p);
+    $('duelShare').textContent = 'SHARE THE AUDIT';
+    $('duelBack').textContent = 'Back to the tab';
+    show('v-duel');
+  } else {
+    const h = S.habits[0];
+    currentHabitId = h.id;
+    playReveal(h, { short: true });
+  }
+});
+$('homeRun').addEventListener('click', () => enterInput(Premium.isActive() ? 'add' : 'replace'));
+$('ghostStub').addEventListener('click', () => openPaywall({ intent: 'stack' }));
+
+/* ============================================================
+   Settings
+   ============================================================ */
+$('btnSettings').addEventListener('click', openSettings);
+$('btnSettings2').addEventListener('click', openSettings);
+function openSettings() {
+  $('ageVal').textContent = S.age != null ? String(S.age) : '—';
+  renderThemeRow($('themeRow2'));
+  $('appearSeg').querySelectorAll('button').forEach(b => b.classList.toggle('sel', b.dataset.m === S.appearance));
+  $('premState').textContent = Premium.isActive() ? 'Open' : 'Closed';
+  $('offlineDot').textContent = navigator.onLine ? '' : 'Offline. The math still works. ';
+  openSheet('sh-settings');
+}
+$('ageMinus').addEventListener('click', () => bumpAge(-1));
+$('agePlus').addEventListener('click', () => bumpAge(1));
+function bumpAge(d) {
+  if (S.age == null) S.age = 24;
+  S.age = Math.min(80, Math.max(16, S.age + d));
+  ageTouched = true;
+  ageSlider.value = S.age;
+  $('ageVal').textContent = String(S.age);
+  save(); validate();
+  if ($('v-home').classList.contains('active')) renderHome();
+}
+$('appearSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+  S.appearance = b.dataset.m; save();
+  document.documentElement.dataset.appearance = S.appearance;
+  $('appearSeg').querySelectorAll('button').forEach(x => x.classList.toggle('sel', x === b));
+}));
+$('setMath').addEventListener('click', () => { closeSheet(true); openExplain(); });
+$('setPremium').addEventListener('click', () => { closeSheet(true); openPaywall(); });
+$('setInstall').addEventListener('click', () => { closeSheet(true); triggerInstall(); });
+$('setClear').addEventListener('click', () => {
+  confirmSheet('Delete every habit, streak, and receipt on this phone? There’s no cloud — gone is gone.', 'Delete it all', 'Keep it', () => {
+    const prem = S.premium; // a purchase is never deleted
+    S = { age: null, habits: [], theme: 'thermal', aspect: '45', tagOn: true, appearance: S.appearance, premium: prem, installSnoozed: S.installSnoozed, installPrompted: S.installPrompted, sharedOnce: false, sessions: 0 };
+    save();
+    currentHabitId = null; duel = null; ageTouched = false;
+    $('rvPaper').textContent = '';
+    ageSlider.value = 24;
+    enterInput('first');
+  });
+});
+
+/* ============================================================
+   Install
+   ============================================================ */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function maybeShowBanner(fromShare) {
+  if (isStandalone || S.installSnoozed || S.installPrompted) return;
+  if (!fromShare && !(S.sessions >= 2 && S.habits.length)) return;
+  S.installPrompted = true; save();
+  setTimeout(() => {
+    $('banner').classList.add('on');
+    setTimeout(() => $('banner').classList.remove('on'), 12000);
+  }, fromShare ? 900 : 1600);
+}
+$('bX').addEventListener('click', () => { $('banner').classList.remove('on'); S.installSnoozed = true; save(); });
+$('bAdd').addEventListener('click', () => { $('banner').classList.remove('on'); triggerInstall(); });
+function triggerInstall() {
+  if (isStandalone) { toast('Already on your home screen.'); return; }
+  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; return; }
+  const android = /android/i.test(navigator.userAgent);
+  $('stepsIOS').hidden = android;
+  $('stepsAndroid').hidden = !android;
+  openSheet('sh-ios');
+}
+
+/* ============================================================
+   Boot
+   ============================================================ */
+document.documentElement.dataset.appearance = S.appearance || 'dark';
+S.sessions = (S.sessions || 0) + 1; save();
+try {
+  if (S.habits.length && S.age != null) {
+    currentHabitId = S.habits[0].id;
+    renderHome();
+    show('v-home');
+    maybeShowBanner();
+  } else {
+    enterInput('first');
+  }
+  renderThemeRow($('themeRow2'));
+} catch (e) {
+  // Never strand the user on a broken boot: reset the session and start fresh.
+  S.habits = []; S.age = null; currentHabitId = null; ageTouched = false;
+  save();
+  try { renderThemeRow($('themeRow2')); } catch (e2) {}
+  enterInput('first');
+}
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
