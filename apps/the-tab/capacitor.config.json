@@ -1,0 +1,13 @@
+{
+  "appId": "app.thetab.ios",
+  "appName": "The Tab",
+  "webDir": ".",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0C0E12",
+    "preferredContentMode": "mobile"
+  },
+  "server": {
+    "iosScheme": "thetab"
+  }
+}
